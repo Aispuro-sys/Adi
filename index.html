@@ -290,7 +290,9 @@ body.easter.lights-on .card {
 }
 
 .btn.ghost {
-  background: rgba(255,255,255,0.55);
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(43,43,43,0.2);
+  font-weight: 600;
 }
 
 .lights-on .btn {
@@ -299,7 +301,15 @@ body.easter.lights-on .card {
 }
 
 .lights-on .btn.ghost {
-  background: rgba(255,255,255,0.72);
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.6);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.btn.ghost:hover {
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
 }
 
 body.easter .btn {
@@ -537,7 +547,9 @@ body.easter .fox {
   <div class="actions">
     <button class="btn primary" id="toggleLights" type="button">Encender luz</button>
     <button class="btn ghost" id="openSurprise" type="button">Sorpresa</button>
-    <button class="btn ghost" onclick="window.location.href='index2.html'" type="button">Playlist 2025</button>
+    <a href="index2.html" class="btn ghost" style="text-decoration: none;">Playlist 2025</a>
+    <a href="index3.html" class="btn ghost" style="text-decoration: none;">Flores</a>
+    <a href="index4.html" class="btn ghost" style="text-decoration: none;">Momentos</a>
   </div>
 
   <div class="footer">
