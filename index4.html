@@ -657,6 +657,44 @@
       .modal-text { font-size: 1.1rem; }
     }
   </style>
+  <script>
+    // Define globally in head to ensure availability
+    var attempts = 0;
+    window.attemptUnlock = function() {
+      const input = document.getElementById('passwordInput');
+      const errorMsg = document.getElementById('errorMsg');
+      const lockScreen = document.getElementById('lockScreen');
+      
+      if (!input || !lockScreen) return;
+
+      // Password: "Stendhal"
+      if(input.value.trim() === 'Stendhal') {
+        lockScreen.classList.add('hidden');
+        sessionStorage.setItem('unlocked_index4', 'true');
+        attempts = 0;
+      } else {
+        attempts++;
+        if(errorMsg) {
+            if (attempts >= 3) {
+                errorMsg.textContent = "Contacta con sistemas";
+                errorMsg.classList.add('show');
+                // Keep the critical error shown longer
+                setTimeout(() => {
+                    errorMsg.classList.remove('show');
+                    // Reset text after hide
+                    setTimeout(() => { errorMsg.textContent = "La respuesta no es correcta."; }, 300);
+                }, 4000);
+            } else {
+                errorMsg.textContent = "La respuesta no es correcta.";
+                errorMsg.classList.add('show');
+                setTimeout(() => errorMsg.classList.remove('show'), 2000);
+            }
+        }
+        input.value = '';
+        input.focus();
+      }
+    };
+  </script>
 </head>
 <body>
 
@@ -676,7 +714,7 @@
         <input type="password" id="passwordInput" class="lock-input" placeholder="Escribe la respuesta" />
       </div>
       
-      <button class="lock-btn" onclick="checkPassword()">Desbloquear</button>
+      <button class="lock-btn" onclick="attemptUnlock()">Desbloquear</button>
       <div id="errorMsg" class="error-msg">La respuesta no es correcta.</div>
     </div>
   </div>
@@ -809,7 +847,7 @@
       const passInput = document.getElementById('passwordInput');
       if(passInput) {
         passInput.addEventListener('keypress', function (e) {
-          if (e.key === 'Enter') window.checkPassword();
+          if (e.key === 'Enter') window.attemptUnlock();
         });
       }
     });
