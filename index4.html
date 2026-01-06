@@ -821,10 +821,29 @@
          <button class="nav-btn next-btn" onclick="nextTrack()" title="Siguiente">❯</button>
       </div>
 
-      <div class="carousel-dots" id="carouselDots">
-      <button class="action-btn" onclick="readMessageAgain()">💌 Leer Carta</button>
-      <button class="action-btn" onclick="resetPuzzle()">🧩 Re-armar</button>
-      <button class="action-btn" onclick="closeFullImage()">Cerrar</button>
+      <div class="carousel-dots" id="carouselDots"></div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="successModal" class="modal">
+    <div class="modal-card">
+      <h2 style="font-family:'Playfair Display',serif; margin-bottom:10px; color:var(--accent-pink);">¡Recuerdo Desbloqueado!</h2>
+      <div style="font-size:3rem; margin-bottom:20px;">✨</div>
+      <p id="successMessage" class="modal-text"></p>
+      <div class="controls">
+        <button class="action-btn primary-btn" onclick="closeSuccessAndShowImage()">Ver Foto Completa</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Image Modal -->
+  <div id="fullImageModal" class="full-image-container">
+    <img id="fullImageDisplay" src="" alt="Recuerdo Completo">
+    <div class="controls">
+        <button class="action-btn" onclick="readMessageAgain()">💌 Leer Carta</button>
+        <button class="action-btn" onclick="resetPuzzle()">🧩 Armar de nuevo</button>
+        <button class="action-btn" onclick="closeFullImage()">Cerrar</button>
     </div>
   </div>
 
