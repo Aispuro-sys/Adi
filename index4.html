@@ -37,12 +37,12 @@
       position: relative;
     }
 
-    /* Lock Screen Overlay */
+    /* Lock Screen Overlay - Professional Redesign */
     #lockScreen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: #120816;
-      background-image: var(--bg-gradient);
+      background: #0a050b;
+      background-image: radial-gradient(circle at center, #1a0d1f 0%, #050205 100%);
       z-index: 10000;
       display: flex;
       justify-content: center;
@@ -55,61 +55,98 @@
       pointer-events: none;
     }
     .lock-card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      padding: 40px;
-      border-radius: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(25px);
+      padding: 60px 40px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       text-align: center;
       width: 90%;
-      max-width: 350px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-      animation: floatLock 6s ease-in-out infinite;
+      max-width: 420px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+      animation: fadeInLock 1s ease-out;
     }
-    @keyframes floatLock {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    @keyframes fadeInLock {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-    .lock-icon { font-size: 3rem; margin-bottom: 20px; }
-    .lock-input {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      background: rgba(0, 0, 0, 0.3);
-      color: white;
-      margin-bottom: 15px;
-      outline: none;
-      text-align: center;
-      font-family: inherit;
-      font-size: 1rem;
+    .lock-icon { 
+      font-size: 3.5rem; 
+      margin-bottom: 25px; 
+      filter: drop-shadow(0 0 20px rgba(255, 133, 194, 0.3));
+      opacity: 0.9;
+    }
+    .lock-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: #fff;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+    .lock-riddle {
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.8;
+      margin-bottom: 40px;
+      font-weight: 300;
+    }
+    .lock-input-group {
+      position: relative;
+      margin-bottom: 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
       transition: border-color 0.3s;
     }
-    .lock-input:focus { border-color: var(--accent-pink); }
+    .lock-input-group:focus-within {
+      border-color: var(--accent-pink);
+    }
+    .lock-input {
+      width: 100%;
+      padding: 15px 10px;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      letter-spacing: 2px;
+      outline: none;
+    }
+    .lock-input::placeholder {
+      color: rgba(255, 255, 255, 0.2);
+      font-family: 'Poppins', sans-serif;
+      letter-spacing: 1px;
+      font-size: 0.9rem;
+    }
     .lock-btn {
       width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      border: none;
-      background: var(--accent-pink);
-      color: #120816;
-      font-weight: 600;
+      padding: 16px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+      color: #fff;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.85rem;
       cursor: pointer;
-      font-family: inherit;
-      font-size: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: all 0.3s ease;
     }
     .lock-btn:hover {
+      background: var(--accent-pink);
+      border-color: var(--accent-pink);
+      color: #120816;
+      box-shadow: 0 0 30px rgba(255, 133, 194, 0.4);
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(255, 133, 194, 0.4);
     }
     .error-msg {
       color: #ff6b6b;
-      margin-top: 15px;
-      font-size: 0.9rem;
+      margin-top: 20px;
+      font-size: 0.85rem;
       min-height: 20px;
       opacity: 0;
       transition: opacity 0.3s;
+      letter-spacing: 0.5px;
     }
     .error-msg.show { opacity: 1; }
 
@@ -586,13 +623,16 @@
     }
     @keyframes floatUp {
       0% { transform: translateY(0) scale(0.5); opacity: 0; }
-      10% { opacity: 1; transform: translateY(-20px) scale(1); }
-      100% { transform: translateY(-150px) scale(1.5) rotate(20deg); opacity: 0; }
+      10% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+      100% { opacity: 0; transform: translateY(-100vh) scale(1); }
     }
 
     /* Responsive */
     @media (max-width: 900px) {
-      .puzzle-layout { flex-direction: column; align-items: center; }
+      .puzzle-layout {
+        flex-direction: column;
+        align-items: center;
+      }
       .tray-container { width: 100%; max-height: 250px; }
       
       .player-carousel {
@@ -623,12 +663,21 @@
   <!-- Lock Screen -->
   <div id="lockScreen">
     <div class="lock-card">
-      <div class="lock-icon">🔒</div>
-      <h2 style="font-family:'Playfair Display', serif; margin-bottom:10px;">Contraseña</h2>
-      <p style="margin-bottom: 25px; opacity: 0.7; font-size: 0.9rem;">Escribe la palabra secreta para entrar.</p>
-      <input type="password" id="passwordInput" class="lock-input" placeholder="Tu palabra..." />
+      <div class="lock-icon">🗝️</div>
+      <h2 class="lock-title">Acceso Restringido</h2>
+      <div class="lock-riddle">
+        <p style="margin-bottom: 15px; font-style: italic;">
+          "Soy ese temblor que nace cuando la belleza es excesiva, cuando el arte abruma, acelera el pulso y el alma no sabe si admirar, huir o rendirse. Eres el nombre que se le dio al instante en que lo bello deja de ser contemplación y se convierte en experiencia física del espíritu."
+        </p>
+        <span style="font-size: 0.8rem; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px;">¿Quién soy?</span>
+      </div>
+      
+      <div class="lock-input-group">
+        <input type="password" id="passwordInput" class="lock-input" placeholder="Escribe la respuesta" />
+      </div>
+      
       <button class="lock-btn" onclick="checkPassword()">Desbloquear</button>
-      <div id="errorMsg" class="error-msg">Contraseña incorrecta, intenta de nuevo.</div>
+      <div id="errorMsg" class="error-msg">La respuesta no es correcta.</div>
     </div>
   </div>
 
@@ -691,7 +740,13 @@
     <!-- Star Map Section -->
     <div class="glass-panel" style="background: rgba(10, 10, 15, 0.5); text-align:center;">
         <h2 style="font-family:'Playfair Display', serif; font-size:2.2rem; margin-bottom:10px;">Bajo este cielo coincidimos</h2>
-        <p style="color:var(--text-muted); margin-bottom:30px; line-height:1.6;">
+        
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+          <button class="action-btn" onclick="updateStarMap('july16')">16 Jul 2025</button>
+          <button class="action-btn" onclick="updateStarMap('dec22')">22 Dic 2025</button>
+        </div>
+
+        <p id="starMapInfo" style="color:var(--text-muted); margin-bottom:30px; line-height:1.6; transition: opacity 0.5s;">
             22 de Diciembre de 2025 • CESUN Universidad<br>
             <span style="font-size:0.9rem; opacity:0.8; color:var(--accent-blue);">32.4998° N, 116.9297° O</span><br>
             <span style="font-size:0.8rem; opacity:0.6;">Blvd. Cucapáh Sur #20100, Fracc. El Lago, 22210 Tijuana, B.C.</span>
@@ -729,25 +784,6 @@
       </div>
 
       <div class="carousel-dots" id="carouselDots">
-          <!-- Generated by JS -->
-      </div>
-    </div>
-  </div>
-
-  <!-- Success Modal -->
-  <div id="successModal" class="modal">
-    <div class="modal-card">
-      <div style="font-size: 3.5rem; margin-bottom: 20px;">💖</div>
-      <h2 style="font-family:'Playfair Display', serif; font-size:2rem; margin-bottom: 15px;">¡Recuerdo Desbloqueado!</h2>
-      <p class="modal-text" id="successMessage"></p>
-      <button class="action-btn primary-btn" onclick="closeSuccessAndShowImage()">Ver Foto Completa</button>
-    </div>
-  </div>
-
-  <!-- Full Image View -->
-  <div id="fullImageModal" class="full-image-container">
-    <img id="fullImageDisplay" src="" />
-    <div class="controls">
       <button class="action-btn" onclick="readMessageAgain()">💌 Leer Carta</button>
       <button class="action-btn" onclick="resetPuzzle()">🧩 Re-armar</button>
       <button class="action-btn" onclick="closeFullImage()">Cerrar</button>
@@ -763,46 +799,50 @@
   <script src="https://slowe.github.io/VirtualSky/virtualsky.js"></script>
 
   <script>
-    // --- Password Protection ---
-    function checkPassword() {
-      const input = document.getElementById('passwordInput');
-      const errorMsg = document.getElementById('errorMsg');
-      const lockScreen = document.getElementById('lockScreen');
-      
-      // Password: "Stendhal"
-      if(input.value.trim() === 'Stendhal') {
-        lockScreen.classList.add('hidden');
-        sessionStorage.setItem('unlocked_index4', 'true');
-      } else {
-        errorMsg.classList.add('show');
-        input.value = '';
-        input.focus();
-        setTimeout(() => {
-          errorMsg.classList.remove('show');
-        }, 2000);
-      }
-    }
-
+    // --- Password Protection Init ---
     window.addEventListener('DOMContentLoaded', () => {
       if(sessionStorage.getItem('unlocked_index4') === 'true') {
-        document.getElementById('lockScreen').classList.add('hidden');
+        const lock = document.getElementById('lockScreen');
+        if(lock) lock.classList.add('hidden');
+      }
+      
+      const passInput = document.getElementById('passwordInput');
+      if(passInput) {
+        passInput.addEventListener('keypress', function (e) {
+          if (e.key === 'Enter') window.checkPassword();
+        });
       }
     });
+  </script>
 
-    document.getElementById('passwordInput').addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') checkPassword();
-    });
-
+  <script>
+    let planetarium;
+    
+    // Dates: Month is 0-indexed (0=Jan, 6=July, 11=Dec)
+    const starMapData = {
+      'july16': {
+        date: new Date(2025, 6, 16, 20, 0, 0), // July 16, 2025, 8:00 PM
+        html: `16 de Julio de 2025 • El Primer Encuentro<br>
+               <span style="font-size:0.9rem; opacity:0.8; color:var(--accent-blue);">32.4998° N, 116.9297° O</span><br>
+               <span style="font-size:0.8rem; opacity:0.6;">"Cuando te vi, dije que eras muy bonita."</span>`
+      },
+      'dec22': {
+        date: new Date(2025, 11, 22, 20, 0, 0), // Dec 22, 2025, 8:00 PM
+        html: `22 de Diciembre de 2025 • CESUN Universidad<br>
+               <span style="font-size:0.9rem; opacity:0.8; color:var(--accent-blue);">32.4998° N, 116.9297° O</span><br>
+               <span style="font-size:0.8rem; opacity:0.6;">Blvd. Cucapáh Sur #20100, Fracc. El Lago, 22210 Tijuana, B.C.</span>`
+      }
+    };
 
     // --- Star Map ---
     function initStarMap() {
         S(document).ready(function(){
-            var planetarium = S.virtualsky({
+            planetarium = S.virtualsky({
                 id: 'starmap',
                 projection: 'stereo',
                 latitude: 32.4998, 
                 longitude: -116.9297,
-                date: new Date('2025-12-22T20:00:00-08:00'), 
+                date: new Date(2025, 11, 22, 20, 0, 0), // Initial: Dec 22, 2025
                 constellations: true,
                 gridlines_az: false,
                 gridlines_eq: false,
@@ -812,19 +852,47 @@
                 color: 'white',
                 background: 'rgba(0,0,0,0)', 
                 lang: 'es',
-                mouse: true
+                mouse: true,
+                live: false // Disable auto-update of time
             });
             
             let azimuth = 0;
             setInterval(() => {
-                azimuth += 0.05; 
-                planetarium.az = azimuth;
-                planetarium.draw();
+                if(planetarium) {
+                  azimuth += 0.002; // Slower rotation
+                  planetarium.az = azimuth;
+                  planetarium.draw();
+                }
             }, 50);
         });
     }
+    
+    function updateStarMap(key) {
+      if(!planetarium || !starMapData[key]) return;
+      
+      const info = document.getElementById('starMapInfo');
+      const data = starMapData[key];
+      
+      // Fade out text
+      info.style.opacity = '0';
+      
+      setTimeout(() => {
+        // Update data
+        info.innerHTML = data.html;
+        
+        // Update date directly
+        if(planetarium) {
+            // VirtualSky sometimes needs robust date setting
+            planetarium.date = new Date(data.date); 
+            // Also update latitude/longitude if they were different (they are same here but good practice)
+            planetarium.draw();
+        }
+        
+        // Fade in text
+        info.style.opacity = '1';
+      }, 300);
+    }
 
-    // --- Starfield FX ---
     function createStars() {
       const starfield = document.getElementById('starfield');
       const count = 60; 
