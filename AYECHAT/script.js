@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRecording = false;
     let messagesUnsubscribe = null;
     let partnerUnsubscribe = null;
+    let typingTimeout = null;
 
     // --- INITIALIZATION ---
     
@@ -103,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('beforeunload', () => {
             if (currentUser) {
                 updateOnlineStatus(false); // Set offline on close
+                updateActivityStatus(null); // Clear typing/recording
             }
         });
     }
@@ -121,6 +123,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function updateActivityStatus(status) {
+        if (!currentUser) return;
+        try {
+            await updateDoc(doc(db, "users", currentUser.id), {
+                activityStatus: status
+            });
+        } catch (e) {
+            console.error("Error updating activity status:", e);
+        }
+    }
+
     async function loadUserAndStart(userId) {
         try {
             const userDoc = await getDoc(doc(db, "users", userId));
@@ -136,7 +149,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     password: DEFAULT_PASSWORD,
                     avatar: `https://ui-avatars.com/api/?name=${userId}&background=random`,
                     chatBackground: '',
-                    online: true
+                    online: true,
+                    activityStatus: null
                 };
                 showChatInterface();
             }
@@ -153,7 +167,8 @@ document.addEventListener('DOMContentLoaded', () => {
             password: DEFAULT_PASSWORD,
             avatar: `https://ui-avatars.com/api/?name=${userId}&background=random`,
             chatBackground: '',
-            online: false
+            online: false,
+            activityStatus: null
         };
         await setDoc(doc(db, "users", userId), defaultData);
     }
@@ -201,9 +216,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUserAvatar.src = partnerData.avatar || `https://ui-avatars.com/api/?name=${partnerId}`;
                 
                 const statusEl = document.querySelector('.status');
-                if (partnerData.online) {
+                
+                // Priority: Activity Status > Online > Last Seen
+                if (partnerData.activityStatus === 'typing') {
+                    statusEl.textContent = 'Escribiendo...';
+                    statusEl.style.color = '#7289da'; // Primary blueish color
+                    statusEl.style.fontStyle = 'italic';
+                } else if (partnerData.activityStatus === 'recording') {
+                    statusEl.textContent = 'Grabando audio...';
+                    statusEl.style.color = '#ff4757'; // Red
+                    statusEl.style.fontStyle = 'italic';
+                } else if (partnerData.online) {
                     statusEl.textContent = 'En línea';
                     statusEl.style.color = '#43b581';
+                    statusEl.style.fontStyle = 'normal';
                 } else {
                     let lastSeenText = 'Desconectado';
                     if (partnerData.lastSeen) {
@@ -212,24 +238,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     statusEl.textContent = lastSeenText;
                     statusEl.style.color = '#b9bbbe';
+                    statusEl.style.fontStyle = 'normal';
                 }
             }
         });
     }
 
-    // updateHeaderUI is removed/replaced by setupPartnerHeader logic for the chat view, 
-    // but we might keep a simplified version if needed elsewhere, 
-    // actually setupPartnerHeader handles the dynamic updates.
-    function updateHeaderUI() {
-        // This function is now largely redundant for the main header 
-        // because we are showing the PARTNER info, not the current user info.
-        // We will leave it empty or remove calls to it.
-    }
-    
     // ... (applyChatBackground remains same) ...
 
     function logout() {
-        if (currentUser) updateOnlineStatus(false); // Go offline
+        if (currentUser) {
+            updateOnlineStatus(false); // Go offline
+            updateActivityStatus(null);
+        }
 
         localStorage.removeItem(LOGIN_KEY);
         currentUser = null;
@@ -481,6 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sendMessage(text);
             messageInput.value = '';
             messageInput.style.height = 'auto';
+            updateActivityStatus(null); // Stop typing status immediately
+            clearTimeout(typingTimeout);
         }
     });
 
@@ -494,6 +517,15 @@ document.addEventListener('DOMContentLoaded', () => {
     messageInput.addEventListener('input', function() {
         this.style.height = 'auto';
         this.style.height = (this.scrollHeight) + 'px';
+        
+        // Typing indicator logic
+        updateActivityStatus('typing');
+        
+        if (typingTimeout) clearTimeout(typingTimeout);
+        
+        typingTimeout = setTimeout(() => {
+            updateActivityStatus(null);
+        }, 2000); // Stop showing "typing" after 2 seconds of inactivity
     });
 
     fileInput.addEventListener('change', async (e) => {
@@ -553,6 +585,9 @@ document.addEventListener('DOMContentLoaded', () => {
         recordBtn.addEventListener('click', async () => {
             if (!isRecording) {
                 try {
+                    // Update status to recording
+                    updateActivityStatus('recording');
+
                     // Debug: Check available devices first
                     const devices = await navigator.mediaDevices.enumerateDevices();
                     console.log("Available devices:", devices);
@@ -583,6 +618,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     };
 
                     mediaRecorder.onstop = async () => {
+                        // Reset activity status
+                        updateActivityStatus(null);
+                        
                         // Use the same mime type for the blob
                         const audioBlob = new Blob(audioChunks, { type: mimeType.split(';')[0] });
                         // Validate blob size
@@ -611,6 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     isRecording = true;
                     recordBtn.classList.add('recording');
                 } catch (err) {
+                    updateActivityStatus(null); // Reset on error
                     console.error('Error accessing microphone:', err);
                     if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
                         alert("⚠️ Permiso de micrófono denegado.\nPor favor, permite el acceso al micrófono en tu navegador para enviar notas de voz.");
@@ -626,6 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 isRecording = false;
                 recordBtn.classList.remove('recording');
+                updateActivityStatus(null); // Ensure reset
             }
         });
     } else {
