@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Para Adi — San Valentín</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b1026;
+      --bg-gradient: linear-gradient(135deg, #2a0808 0%, #160202 50%, #1a0505 100%);
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --accent-pink: #ff4d6d;
+      --accent-gold: #ffd700;
+      --text-main: rgba(255, 255, 255, 0.95);
+      --text-muted: rgba(255, 255, 255, 0.7);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-dark);
+      background-image: var(--bg-gradient);
+      background-attachment: fixed;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* --- LOCK SCREEN & COUNTDOWN --- */
+    #lockScreen {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #0a050b;
+      background-image: radial-gradient(circle at center, #1f0510 0%, #050202 100%);
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+    }
+    #lockScreen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    .lock-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(25px);
+      padding: 50px 40px;
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      width: 90%;
+      max-width: 450px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      animation: fadeInLock 1s ease-out;
+    }
+    @keyframes fadeInLock {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .lock-icon { font-size: 3rem; margin-bottom: 20px; filter: drop-shadow(0 0 20px rgba(255, 77, 109, 0.3)); }
+    .lock-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin: 0 0 10px;
+    }
+    .countdown-container {
+      margin: 25px 0;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .time-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 10px;
+      border-radius: 12px;
+      min-width: 60px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .time-val { font-size: 1.5rem; font-weight: 600; font-family: 'Playfair Display', serif; color: var(--accent-pink); }
+    .time-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.6; margin-top: 5px; }
+    
+    .lock-input {
+      width: 100%;
+      padding: 15px;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 50px;
+      color: #fff;
+      text-align: center;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .lock-input:focus { border-color: var(--accent-pink); }
+    .lock-btn {
+      width: 100%;
+      padding: 15px;
+      border-radius: 50px;
+      border: none;
+      background: linear-gradient(135deg, var(--accent-pink), #ff85a2);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .lock-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255, 77, 109, 0.4); }
+    .error-msg { color: #ff6b6b; margin-top: 15px; font-size: 0.9rem; opacity: 0; min-height: 20px; }
+    .error-msg.show { opacity: 1; }
+
+    /* --- NAVIGATION --- */
+    .nav-bar {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      padding: 10px 20px;
+      background: rgba(20, 10, 15, 0.7);
+      backdrop-filter: blur(15px);
+      border-radius: 50px;
+      border: 1px solid rgba(255,255,255,0.1);
+      z-index: 1000;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 95vw;
+    }
+    .nav-link {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 8px 16px;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    /* --- MAIN LAYOUT --- */
+    .container {
+      max-width: 1000px;
+      margin: 85px auto 10px; /* Clear navbar */
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px; /* Close proximity */
+    }
+    .page-header { text-align: center; margin-bottom: 0; }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      margin-bottom: 0;
+      background: linear-gradient(to right, #ff9a9e, #fecfef);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 5px auto 0;
+      line-height: 1.6;
+      text-align: center;
+    }
+    
+    /* --- ENVELOPE ANIMATION --- */
+    .envelope-wrapper {
+      perspective: 1500px;
+      width: 100%;
+      max-width: 600px;
+      height: 220px;
+      position: relative;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .envelope {
+      position: relative;
+      width: 320px;
+      height: 220px;
+      background: #f7e6e8;
+      background: linear-gradient(135deg, #fff0f3 0%, #fde2e4 100%);
+      box-shadow: 
+        0 30px 60px rgba(0,0,0,0.4),
+        inset 0 0 20px rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+      z-index: 10;
+      border-radius: 6px;
+    }
+    .envelope:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 40px 80px rgba(0,0,0,0.5); }
+    
+    .envelope-flap {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: #fbc3bc;
+      background: linear-gradient(180deg, #ffc2d1 0%, #ffb3c1 100%);
+      clip-path: polygon(0 0, 50% 50%, 100% 0);
+      transform-origin: top;
+      transition: transform 0.6s 0.2s cubic-bezier(0.4,0,0.2,1), z-index 0.6s;
+      z-index: 20;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+    }
+    
+    .envelope-body {
+      position: absolute;
+      bottom: 0; left: 0; width: 100%; height: 100%;
+      background: #f8d7da;
+      background: linear-gradient(0deg, #ffccd5 0%, #ffb3c1 100%);
+      clip-path: polygon(0 0, 50% 40%, 100% 0, 100% 100%, 0 100%);
+      z-index: 30;
+      box-shadow: inset 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .seal {
+      position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 50px; height: 50px;
+      background: radial-gradient(circle at 30% 30%, #ff4d6d, #c9184a);
+      border-radius: 50%;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+      z-index: 25;
+      transition: opacity 0.4s;
+      border: 2px solid rgba(255,255,255,0.2);
+      display: flex; justify-content: center; align-items: center;
+      color: rgba(255,255,255,0.95); font-size: 1.4rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .seal::after { content: '♥'; }
+    
+    /* Opened State */
+    .envelope.open { cursor: default; transform: translateY(150px); opacity: 0; pointer-events: none; transition: opacity 0.5s 1s, transform 0.5s 1s; }
+    .envelope.open .envelope-flap { transform: rotateX(180deg); z-index: 5; }
+    .envelope.open .seal { opacity: 0; }
+
+    /* The Letter itself */
+    .letter-view {
+      position: fixed; /* Modal-like experience */
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(20, 5, 10, 0.85);
+      backdrop-filter: blur(15px);
+      z-index: 5000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease;
+    }
+    .letter-view.active { opacity: 1; pointer-events: auto; }
+    
+    .letter-paper {
+      width: 90%; max-width: 600px;
+      height: 85vh; /* Fixed height */
+      background: #fffcf5;
+      padding: 50px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      position: relative;
+      transform: translateY(50px) scale(0.9);
+      transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      border-radius: 4px;
+    }
+    .letter-view.active .letter-paper { transform: translateY(0) scale(1); }
+
+    /* Paper Texture */
+    .letter-paper::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+      opacity: 0.5; pointer-events: none;
+    }
+
+    .letter-content {
+      flex-grow: 1;
+      font-family: 'Playfair Display', serif;
+      color: #4a2c2c;
+      font-size: 1.15rem;
+      line-height: 1.8;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .letter-content::-webkit-scrollbar { width: 4px; }
+    .letter-content::-webkit-scrollbar-track { background: transparent; }
+    .letter-content::-webkit-scrollbar-thumb { background: rgba(74, 44, 44, 0.2); border-radius: 4px; }
+
+    .letter-img {
+      max-width: 100%;
+      height: auto;
+      max-height: 450px;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      margin: 20px auto 0;
+      display: block;
+      object-fit: contain;
+    }
+    
+    .letter-page {
+      display: none;
+      animation: fadeInPage 0.8s ease;
+      height: 100%;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .letter-page.active { display: flex; }
+    .letter-page.centered { justify-content: center; align-items: center; } 
+    
+    @keyframes fadeInPage { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .letter-controls {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+      border-top: 1px solid rgba(0,0,0,0.05);
+      padding-top: 20px;
+    }
+    
+    .btn-text {
+      background: none; border: none;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500; color: #8a5a5a;
+      cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 5px;
+      transition: color 0.3s;
+    }
+    .btn-text:hover { color: var(--accent-pink); }
+    .btn-text:disabled { opacity: 0.3; cursor: default; }
+
+    .read-btn {
+      background: linear-gradient(45deg, var(--accent-pink), #ff85a2);
+      border: none;
+      padding: 15px 40px;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(255, 77, 109, 0.4);
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+    }
+    .read-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(255, 77, 109, 0.6);
+    }
+
+    /* Improved Close Button Style */
+    .btn-close-custom {
+      position: absolute; 
+      top: 15px; 
+      right: 15px;
+      width: 40px !important;
+      height: 40px !important;
+      background: rgba(255, 255, 255, 0.9); 
+      border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 50% !important;
+      cursor: pointer; 
+      color: #ff4d6d;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      padding: 0;
+      min-width: 40px;
+    }
+    .btn-close-custom:hover {
+      transform: rotate(90deg) scale(1.1);
+      background: #ff4d6d;
+      color: #fff;
+      box-shadow: 0 6px 20px rgba(255, 77, 109, 0.4);
+      border-color: #ff4d6d;
+    }
+    .btn-close-custom svg {
+      width: 24px; height: 24px; stroke-width: 2; stroke: currentColor;
+    }
+
+    /* Modal close button specific override */
+    .pdf-modal .close-letter {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 30px;
+      padding: 8px 24px;
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-block;
+      width: auto;
+      height: auto;
+    }
+
+    /* --- BOOK SECTION --- */
+    .book-section {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 60px 40px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    
+    .book-cover {
+      width: 180px;
+      height: 260px;
+      background: linear-gradient(135deg, #1a237e, #3949ab);
+      border-radius: 5px 15px 15px 5px;
+      box-shadow: 
+        inset 4px 0 10px rgba(0,0,0,0.5),
+        10px 20px 40px rgba(0,0,0,0.6);
+      margin: 0 auto 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: transform 0.4s ease;
+      cursor: pointer;
+    }
+    .book-cover:hover { transform: translateY(-10px) rotateY(-10deg); }
+    .book-cover::after {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 10px; width: 2px;
+      background: rgba(255,255,255,0.2);
+    }
+    
+    .book-title {
+      font-family: 'Playfair Display', serif;
+      color: #ffd700; font-size: 1.4rem; padding: 0 10px; margin-bottom: 5px;
+    }
+    .book-author {
+      font-size: 0.8rem; color: rgba(255,255,255,0.8);
+    }
+
+    /* --- CAROUSEL SECTION --- */
+    .carousel-section {
+      width: 100%;
+      padding: 40px 0;
+      position: relative;
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    /* Single large card view */
+    .carousel-track-container {
+      width: 390px; /* Card width 350 + 40 gap */
+      overflow: hidden;
+      position: relative;
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 40px; /* Gap between cards */
+      width: max-content;
+      transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    .carousel-arrow {
+      background: rgba(255, 77, 109, 0.2);
+      border: 1px solid rgba(255, 77, 109, 0.5);
+      color: #fff;
+      font-size: 2rem;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin: 0 30px;
+      z-index: 10;
+      backdrop-filter: blur(5px);
+    }
+    .carousel-arrow:hover {
+      background: #ff4d6d;
+      box-shadow: 0 0 15px rgba(255, 77, 109, 0.6);
+      transform: scale(1.1);
+    }
+
+    .passion-card {
+      width: 350px; /* Increased size */
+      height: 500px;
+      flex-shrink: 0;
+      background: linear-gradient(145deg, #2a0a10, #4a0f18);
+      border: 1px solid rgba(255, 77, 109, 0.3);
+      border-radius: 20px;
+      padding: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s;
+    }
+    
+    .passion-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 15px 40px rgba(255, 77, 109, 0.4);
+      border-color: rgba(255, 77, 109, 0.6);
+    }
+
+    .passion-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='rgba(255, 77, 109, 0.1)'/%3E%3C/svg%3E");
+      opacity: 0.3;
+    }
+
+    .passion-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; /* Larger font */
+      color: #ffcbd1;
+      line-height: 1.5;
+      z-index: 2;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    
+    .fire-glow {
+      position: absolute;
+      bottom: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 150%;
+      height: 150px;
+    }
+    /* --- EXTRAS --- */
+    .heart-bg {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    }
+    .particle {
+      position: absolute;
+      animation: floatUp 15s linear infinite;
+      opacity: 0.3;
+    }
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      50% { opacity: 0.5; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+    
+    /* PDF MODAL */
+    .pdf-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000;
+      display: none; flex-direction: column; padding: 20px;
+    }
+    .pdf-modal.show { display: flex; }
+    .pdf-frame { flex: 1; width: 100%; border: none; background: #fff; border-radius: 8px; }
+
+    /* MUSIC WIDGET */
+    .music-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(20, 10, 15, 0.8);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 77, 109, 0.2);
+      border-radius: 50px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 5000;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      transition: transform 0.3s;
+    }
+    .music-widget:hover { transform: translateY(-5px); }
+    .music-btn {
+      background: none; border: none; color: #ff4d6d;
+      font-size: 1.5rem; cursor: pointer; display: flex; align-items: center;
+    }
+    .music-info {
+      display: flex; flex-direction: column;
+    }
+    .song-title { font-size: 0.9rem; font-weight: 600; color: #fff; }
+    .song-artist { font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+    
+    /* LYRICS MODAL */
+    .lyrics-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .lyrics-modal.show { display: flex; }
+    
+    /* Improved Close Button for Lyrics */
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 77, 109, 0.8);
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+      z-index: 100;
+      transition: all 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    .modal-close-btn:hover {
+      background: #ff4d6d;
+      transform: scale(1.05);
+      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4);
+    }
+
+    .lyrics-content {
+      max-width: 600px;
+      width: 100%;
+      height: 80vh;
+      overflow-y: auto;
+      text-align: center;
+      color: rgba(255,255,255,0.9);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      padding: 40px 20px 20px; /* Top padding for close btn space on mobile if needed */
+    }
+    .lyrics-content::-webkit-scrollbar { width: 4px; }
+    .lyrics-content::-webkit-scrollbar-thumb { background: #ff4d6d; border-radius: 4px; }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .hero-title { font-size: 2.2rem; }
+      .letter-paper { width: 100%; height: 100%; border-radius: 0; padding: 30px; }
+      
+      .nav-bar { 
+        width: 95%; 
+        padding: 8px; 
+        top: 10px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+      }
+      
+      .passion-card { 
+        width: 280px; 
+        height: 420px; 
+        padding: 25px; 
+      }
+      .passion-text { font-size: 1.4rem; }
+      
+      .carousel-track-container { 
+        width: 300px; /* 280 card + 20 gap */
+      }
+      .carousel-track {
+        gap: 20px;
+      }
+      
+      .carousel-arrow { 
+        width: 40px; 
+        height: 40px; 
+        font-size: 1.5rem; 
+        margin: 0 5px; 
+      }
+      
+      .modal-close-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .lock-card {
+        width: 95%;
+        padding: 30px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOCK SCREEN -->
+  <div id="lockScreen">
+    <div class="lock-card">
+      <div class="lock-icon">🔒</div>
+      <h2 class="lock-title">San Valentín</h2>
+      
+      <div class="countdown-container" id="countdown">
+        <div class="time-box"><div class="time-val" id="days">00</div><div class="time-label">Días</div></div>
+        <div class="time-box"><div class="time-val" id="hours">00</div><div class="time-label">Hrs</div></div>
+        <div class="time-box"><div class="time-val" id="mins">00</div><div class="time-label">Min</div></div>
+        <div class="time-box"><div class="time-val" id="secs">00</div><div class="time-label">Seg</div></div>
+      </div>
+
+      <div id="lockedContent">
+        <div class="lock-riddle">
+          <p>"Soy el secreto que guardas hasta que llegue el momento."</p>
+        </div>
+        <input type="password" id="passwordInput" class="lock-input" placeholder="Contraseña Secreta" />
+        <button class="lock-btn" onclick="checkPassword()">Desbloquear</button>
+        <div id="errorMsg" class="error-msg">Código incorrecto</div>
+      </div>
+
+      <div id="unlockedContent" style="display:none;">
+        <p style="margin-bottom:20px; color: #fff;">¡Ha llegado el momento!</p>
+        <button class="lock-btn" onclick="enterSite()">Entrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <div class="nav-bar">
+    <a href="index.html" class="nav-link">Inicio</a>
+    <a href="index2.html" class="nav-link">Playlist</a>
+    <a href="index3.html" class="nav-link">Flores</a>
+    <a href="index4.html" class="nav-link">Momentos</a>
+    <a href="index5.html" class="nav-link active">San Valentín</a>
+  </div>
+
+  <!-- MAIN CONTAINER -->
+  <div class="container">
+    <div class="page-header">
+      <h1 class="hero-title">Para Adi</h1>
+      <p class="subtitle">Algo que quería decirte, guardado en un sobre.</p>
+    </div>
+
+    <!-- ENVELOPE -->
+    <div class="envelope-wrapper">
+      <div class="envelope" onclick="openEnvelope()">
+        <div class="envelope-flap"></div>
+        <div class="envelope-body"></div>
+        <div class="seal">💌</div>
+      </div>
+    </div>
+
+    <!-- BOOK SECTION -->
+    <div class="book-section">
+      <h2 style="font-family:'Playfair Display'; margin-bottom:30px; font-size:2.2rem; color:#fff;">Nuestra Lectura</h2>
+      
+      <div class="book-cover" onclick="openBook()">
+        <div style="font-size: 3rem; margin-bottom: 10px;">👑</div>
+        <div class="book-title">El Principito</div>
+        <div class="book-author">Antoine de Saint-Exupéry</div>
+      </div>
+
+      <p style="margin-bottom:30px; color:rgba(255,255,255,0.8); max-width:600px; margin-left:auto; margin-right:auto; font-style:italic;">
+        "Solo con el corazón se puede ver bien; lo esencial es invisible a los ojos."<br>
+        Una historia para recordarnos la belleza de las cosas simples.
+      </p>
+      
+      <button class="read-btn" onclick="openBook()">📖 Leer el Libro</button>
+    </div>
+
+    <!-- PASSION CAROUSEL -->
+    <div class="carousel-section">
+      <button class="carousel-arrow" onclick="moveCarousel(-1)">&#8249;</button>
+      <div class="carousel-track-container">
+        <div class="carousel-track" id="passionTrack">
+          <!-- Cards -->
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te deseo sin control.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te pienso con mi piel ardiendo lento.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Mi deseo crece salvaje cuando tu ausencia pierde sentido.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Me estoy dejando llevar por el impulso que pronuncia tu nombre.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">No existen frenos cuando tu piel gobierna mis pensamientos.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Cada latido insiste terco, reclamando tu cercanía inmediata.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero tenerte ahora.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Sin defensas, sin retorno posible.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que nos consuma esta lujuria insaciable.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Incitar indecencia en tus pensamientos.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Yo quiero corromperte de formas muy perversas.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tus labios se mojen al mirarme.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero adueñarme de tu fuego.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Volverte adicta a mis provocaciones.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero que tus deseos contengan mi nombre.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero ser la tentación que no se puede evitar.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">El antojo salvaje de tu alma.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Las almas nacidas del fuego se atraen, no pueden evitarlo.</p></div>
+          
+          <!-- Duplicate for infinite scroll -->
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te deseo sin control.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te pienso con mi piel ardiendo lento.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Mi deseo crece salvaje cuando tu ausencia pierde sentido.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Me estoy dejando llevar por el impulso que pronuncia tu nombre.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">No existen frenos cuando tu piel gobierna mis pensamientos.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Cada latido insiste terco, reclamando tu cercanía inmediata.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero tenerte ahora.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Sin defensas, sin retorno posible.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que nos consuma esta lujuria insaciable.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Incitar indecencia en tus pensamientos.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Yo quiero corromperte de formas muy perversas.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tus labios se mojen al mirarme.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero adueñarme de tu fuego.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Volverte adicta a mis provocaciones.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero que tus deseos contengan mi nombre.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero ser la tentación que no se puede evitar.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">El antojo salvaje de tu alma.</p></div>
+          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Las almas nacidas del fuego se atraen, no pueden evitarlo.</p></div>
+        </div>
+      </div>
+      <button class="carousel-arrow" onclick="moveCarousel(1)">&#8250;</button>
+    </div>
+
+  </div>
+
+  <!-- LETTER OVERLAY -->
+  <div class="letter-view" id="letterView">
+    <div class="letter-paper">
+      <button class="btn-close-custom" onclick="closeEnvelope()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+      
+      <div class="letter-content" id="letterContent">
+        <!-- Page 1 (Text) -->
+        <div class="letter-page active">
+            <h3 style="text-align:center; font-style:italic; margin-bottom:20px;">Mi querida Adi...</h3>
+            <p>
+              Hay sentimientos que nacen en el silencio más profundo y crecen con la fuerza de un incendio en la oscuridad. Eres, sin lugar a dudas, lo mejor que me ha pasado en la vida, el verso más bonito que el destino decidió escribir en mi historia.
+            </p>
+            <p>
+              Me preocupo por ti, y no es una obligación, es una necesidad vital. Porque al mirarte, me reencuentro a mí mismo; eres el espejo donde mi alma, por fin, se reconoce, se siente a salvo y comprende quién es realmente.
+            </p>
+        </div>
+
+        <!-- Page 2 (Image) -->
+        <div class="letter-page centered">
+          <img src="Images/carta%201.jpg" alt="Carta 1" class="letter-img">
+        </div>
+
+        <!-- Page 3 (Text - Poema) -->
+        <div class="letter-page">
+          <p>
+            Te pienso incluso cuando intento no hacerlo, cuando el día pasa sin pronunciar tu nombre, pero en cada sombra, en cada pausa del viento, tu ausencia me lo recuerda. No me basta el tiempo contigo, ni las palabras que intercambiamos, ni las veces que me miraste como si supieras que estaba a punto de caer.
+          </p>
+          <p>
+            Siempre quiero más y ese más me asusta porque no puedo retenerte, que no hay amor suficiente cuando alguien no se siente en casa y aún así si tú quisieras yo sería abrigo, sería tierra firme para tus pasos que dudan, sería refugio en tus días más grises, pero no puedo suplicarte que te quedes si tu alma ya está de viaje.
+          </p>
+        </div>
+
+        <!-- Page 4 (Image) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%202.jpg" alt="Carta 2" class="letter-img">
+        </div>
+
+        <!-- Page 5 (Text - Promesa) -->
+        <div class="letter-page">
+          <p>
+            Tengo la certeza, antigua y profunda, de que esto no empezó aquí, en este tiempo y espacio. Siento que en otra vida, bajo otro cielo quizás más estrellado, te hice una promesa inquebrantable: encontrarte. Y aunque el universo giró mil veces y los caminos se borraron, lo cumplí.
+          </p>
+          <p>
+            Te encontré. Y ahora que estás aquí, mi realidad se define por tu presencia. Eres el ancla que me sostiene en las tormentas y el viento que me impulsa a volar, todo a la vez. Mi alma te conocía mucho antes de que mis ojos te vieran.
+          </p>
+        </div>
+
+        <!-- Page 6 (Image) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%203.jpg" alt="Carta 3" class="letter-img">
+        </div>
+
+        <!-- Page 7 (Text - Fuego Prohibido) -->
+        <div class="letter-page">
+          <p>
+            Sé que lo nuestro habita en el terreno de lo prohibido, en ese espacio secreto y sagrado donde solo nosotros tenemos la llave. No llevamos título ante los ojos del mundo, ni etiquetas que los demás puedan leer, pero ante mi corazón, eres la dueña absoluta y soberana.
+          </p>
+          <p>
+            Y quiero que lo sepas con la fuerza de un juramento eterno: estoy dispuesto a caminar hacia el fuego por ti. Estoy dispuesto a quemarme si es necesario, solo por mantener viva esta llama que nos une en la clandestinidad.
+          </p>
+        </div>
+
+        <!-- Page 8 (Image) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%204.jpg" alt="Carta 4" class="letter-img">
+        </div>
+
+        <!-- Page 9 (Text - Secreto) -->
+        <div class="letter-page">
+          <p>
+            Si este amor es una hoguera, que nos abrase a los dos hasta no dejar rastro. No temo quemarme si es a tu lado; prefiero volverme cenizas en el calor de tu cercanía que vivir intacto y frío en la inmensidad de tu ausencia.
+          </p>
+          <p>
+            Que el fuego purifique nuestros miedos. Guardaré este secreto como el tesoro más valioso, amándote en la sombra, protegiéndote en la luz, dispuesto a todo, sin límites y sin final.
+          </p>
+        </div>
+
+        <!-- Page 10 (Image) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%205.jpg" alt="Carta 5" class="letter-img">
+        </div>
+
+        <!-- Page 11 (Text - Distancia) -->
+        <div class="letter-page">
+          <p>
+            A veces la geografía es cruel y la vida nos presenta caminos que no siempre se cruzan en lo físico tanto como mi corazón anhela desesperadamente. Me duele no poder abrazarte cuando el mundo te pesa, no poder secar tus lágrimas con mis propias manos.
+          </p>
+          <p>
+            Pero he aprendido una verdad universal: el alma no entiende de mapas, ni de kilómetros, ni de barreras. No es necesario que estemos en la misma habitación para que yo esté contigo. Cierra los ojos, respira y siénteme. Estoy ahí, sosteniéndote.
+          </p>
+        </div>
+
+        <!-- Page 12 (Image) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%206.jpg" alt="Carta 6" class="letter-img">
+        </div>
+
+        <!-- Page 13 (Text - Cierre) -->
+        <div class="letter-page">
+           <p>
+             Si alguna vez tus ojos se llenan de lágrimas, que sea solo por la inmensa felicidad de saberte amada incondicionalmente. Por la certeza de que en este vasto mundo hay alguien que te ama al 100%, que daría todo por ti sin pedir nada a cambio.
+           </p>
+           <p>
+             Siempre estaré aquí. En cuerpo cuando el destino lo permita, y en espíritu siempre, eternamente.
+           </p>
+           <br>
+           <p style="text-align:right; font-style:italic; font-size:0.9rem;">
+             Con todo mi amor, mi alma, mi lealtad y mi secreto,<br>
+             Tu admirador incondicional, hoy y siempre.
+           </p>
+        </div>
+
+        <!-- Page 14 (Image - Final) -->
+        <div class="letter-page centered">
+           <img src="Images/carta%207.jpg" alt="Carta 7" class="letter-img">
+        </div>
+      </div>
+
+      <div class="letter-controls">
+        <button class="btn-text" id="prevBtn" onclick="changePage(-1)" disabled>← Anterior</button>
+        <div style="font-size:0.8rem; opacity:0.5;">San Valentín 2026</div>
+        <button class="btn-text" id="nextBtn" onclick="changePage(1)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PDF VIEWER -->
+  <div id="pdfModal" class="pdf-modal">
+    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+      <button class="close-letter" style="color:#fff; position:static;" onclick="closeBook()">Cerrar</button>
+    </div>
+    <iframe class="pdf-frame" src="Libro/El_principito-Antoine_de_Saint-Exupery.pdf"></iframe>
+  </div>
+
+  <!-- MUSIC WIDGET -->
+  <div class="music-widget">
+    <button class="music-btn" id="playPauseBtn" onclick="toggleMusic()">▶</button>
+    <div class="music-info" onclick="openLyrics()" style="cursor: pointer;">
+      <span class="song-title">Aurora</span>
+      <span class="song-artist">Humbe (Click para letra)</span>
+    </div>
+  </div>
+
+  <!-- LYRICS MODAL -->
+  <div id="lyricsModal" class="lyrics-modal">
+    <button class="modal-close-btn" onclick="closeLyrics()">✕ Cerrar</button>
+    <div class="lyrics-content">
+      <p>Me duele el pecho por nunca confesarte<br>
+      Por ser amargo, por no ser tan constante<br>
+      Por no decirte que te amo a cada instante</p>
+
+      <p>Hoy brindo por tenerte aquí<br>
+      Por verte sonreír por mí<br>
+      Por darme ganas de vivir<br>
+      Y por todo lo que aprendí</p>
+
+      <p>Yo te digo todo, no me quiero arrepentir<br>
+      Que el día que te vayas, que tengas que partir<br>
+      No sé qué va a ser de mí<br>
+      Dime, ¿qué será de mí?</p>
+
+      <p>Desde que hiciste mi corazón latir<br>
+      O desde que me empezaste a vestir</p>
+
+      <p>Quiero abrazarte y gritar amén<br>
+      Que por fin, al fin, yo te encontré<br>
+      Yo te encontré</p>
+
+      <p>Correr hasta que duelan los pies<br>
+      Y decir: No te vuelvo a perder<br>
+      No otra vez</p>
+
+      <p>Gracias por tu esfuerzo y por tu amor<br>
+      Por no dudar en darnos lo mejor<br>
+      Por ser nuestro defensor<br>
+      Protegernos de todo el dolor</p>
+
+      <p>Me enseñaste a manejar<br>
+      Me llevaste a navegar<br>
+      Por no dejar de trabajar<br>
+      Carajo, me diste un hogar</p>
+
+      <p>Hoy brindo por tenerte aquí<br>
+      Por verte sonreír por mí<br>
+      Por darme ganas de vivir<br>
+      Y por todo lo que aprendí</p>
+
+      <p>Quiero abrazarte y gritar amén<br>
+      Que por fin, al fin, yo te encontré<br>
+      Yo te encontré</p>
+
+      <p>Correr hasta que duelan los pies<br>
+      Y decir: No te vuelvo a perder<br>
+      No otra vez</p>
+
+      <p>Porque el tatuaje en tu muñeca<br>
+      Nos volverá a juntar<br>
+      Cuando llegue a ese lugar<br>
+      Tan hermoso, otro hogar</p>
+
+      <p>Estando aquí me siento diferente<br>
+      Privilegiado de tenerte frente a frente<br>
+      Me siento libre y transparente<br>
+      Es puro amor y vida todo lo que mi alma siente</p>
+
+      <p>Y siendo honesto yo nunca sentí<br>
+      Nada hasta que por fin te conocí<br>
+      Es claro que yo no viví<br>
+      Hasta que por fin nací<br>
+      Hasta que por fin nací</p>
+    </div>
+  </div>
+
+  <audio id="bgMusic" loop>
+    <source src="musica/Aurora%20-%20Humbe%20(Letra%20Lyrics).mp3" type="audio/mp3">
+  </audio>
+
+  <div class="heart-bg" id="particles"></div>
+
+  <script>
+    /* --- CONFIGURATION --- */
+    // Target Date: Feb 14, 2026 00:00:00
+    const TARGET_DATE = new Date('2026-02-14T00:00:00'); 
+    const SECRET_CODE = "16402080077290";
+    
+    /* --- LOCK SCREEN LOGIC --- */
+    function updateCountdown() {
+      const now = new Date();
+      const diff = TARGET_DATE - now;
+
+      if (diff <= 0) {
+        // Time reached
+        document.getElementById('countdown').style.display = 'none';
+        document.getElementById('lockedContent').style.display = 'none';
+        document.getElementById('unlockedContent').style.display = 'block';
+        return;
+      }
+
+      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      document.getElementById('days').innerText = d < 10 ? '0'+d : d;
+      document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
+      document.getElementById('mins').innerText = m < 10 ? '0'+m : m;
+      document.getElementById('secs').innerText = s < 10 ? '0'+s : s;
+    }
+
+    function checkPassword() {
+      const input = document.getElementById('passwordInput').value.trim();
+      const err = document.getElementById('errorMsg');
+      
+      if (input === SECRET_CODE) {
+        enterSite();
+      } else {
+        err.classList.add('show');
+        setTimeout(() => err.classList.remove('show'), 2000);
+      }
+    }
+
+    // Allow "Enter" key to trigger unlock
+    document.getElementById('passwordInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        checkPassword();
+      }
+    });
+
+    function enterSite() {
+      const lock = document.getElementById('lockScreen');
+      lock.classList.add('hidden');
+      sessionStorage.setItem('unlocked_index5_v2', 'true');
+      
+      // Start music on entry
+      const bgAudio = document.getElementById('bgMusic');
+      if(bgAudio) {
+        bgAudio.volume = 0.3;
+        bgAudio.play().then(() => {
+          const btn = document.getElementById('playPauseBtn');
+          if(btn) btn.innerText = '⏸';
+        }).catch(err => console.log("Autoplay blocked:", err));
+      }
+    }
+
+    /* --- LETTER LOGIC --- */
+    let currentPage = 0;
+    
+    function openEnvelope() {
+      const envelope = document.querySelector('.envelope');
+      envelope.classList.add('open');
+      
+      setTimeout(() => {
+        document.getElementById('letterView').classList.add('active');
+      }, 800);
+    }
+
+    function closeEnvelope() {
+      document.getElementById('letterView').classList.remove('active');
+      setTimeout(() => {
+        document.querySelector('.envelope').classList.remove('open');
+      }, 800);
+    }
+
+    function changePage(dir) {
+      const pages = document.querySelectorAll('.letter-page');
+      pages[currentPage].classList.remove('active');
+      currentPage += dir;
+      
+      if (currentPage < 0) currentPage = 0;
+      if (currentPage >= pages.length) currentPage = pages.length - 1;
+      
+      pages[currentPage].classList.add('active');
+      
+      document.getElementById('prevBtn').disabled = (currentPage === 0);
+      document.getElementById('nextBtn').disabled = (currentPage === pages.length - 1);
+    }
+
+    /* --- EXTRAS --- */
+    function openBook() { document.getElementById('pdfModal').classList.add('show'); }
+    window.closeBook = function() { document.getElementById('pdfModal').classList.remove('show'); }
+
+    /* --- MUSIC & LYRICS --- */
+    const audio = document.getElementById('bgMusic');
+    if(audio) audio.volume = 0.3; // Low volume background
+    
+    function toggleMusic() {
+      const audio = document.getElementById('bgMusic');
+      if (audio.paused) {
+        audio.play();
+        document.getElementById('playPauseBtn').innerText = '⏸';
+      } else {
+        audio.pause();
+        document.getElementById('playPauseBtn').innerText = '▶';
+      }
+    }
+
+    function openLyrics() { document.getElementById('lyricsModal').classList.add('show'); }
+    function closeLyrics() { document.getElementById('lyricsModal').classList.remove('show'); }
+
+    /* --- CAROUSEL LOGIC --- */
+    let carouselIndex = 0;
+    
+    function getCardWidth() {
+      // Desktop: 350px card + 40px gap = 390px
+      // Mobile: 280px card + 20px gap = 300px
+      return window.innerWidth < 600 ? 300 : 390;
+    }
+    
+    function moveCarousel(dir) {
+      const track = document.getElementById('passionTrack');
+      if (!track) return;
+      
+      const totalCards = track.children.length;
+      
+      carouselIndex += dir;
+      
+      if (carouselIndex < 0) {
+        carouselIndex = totalCards - 1;
+      } else if (carouselIndex >= totalCards) {
+        carouselIndex = 0;
+      }
+      
+      const translateX = -(carouselIndex * getCardWidth());
+      track.style.transform = `translateX(${translateX}px)`;
+    }
+
+    // Init
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+    
+    // Check if already unlocked in session
+    if(sessionStorage.getItem('unlocked_index5_v2') === 'true') {
+       document.getElementById('lockScreen').classList.add('hidden');
+    }
+
+    // Particles
+    const bg = document.getElementById('particles');
+    const colors = ['#ff4d6d', '#ff85a2', '#ffd700'];
+    for(let i=0; i<30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.top = Math.random() * 100 + '%';
+      p.style.animationDelay = (Math.random() * 15) + 's';
+      p.style.fontSize = (Math.random() * 20 + 10) + 'px';
+      p.innerText = ['❤', '✨', '🌹', '🦊', '🌷'][Math.floor(Math.random()*5)];
+      p.style.color = colors[Math.floor(Math.random()*3)];
+      bg.appendChild(p);
+    }
+  </script>
+</body>
+</html>
