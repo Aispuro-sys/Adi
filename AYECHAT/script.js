@@ -514,32 +514,52 @@ document.addEventListener('DOMContentLoaded', () => {
             await updateDoc(msgRef, {
                 read: true,
                 readAt: serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Error marking read:", e);
+        }
+    }
+
+    function markUnreadMessagesAsRead() {
+        if (!currentUser) return;
+        // Logic handled by onSnapshot + visibilityState check. 
+        // We could query specifically here but onSnapshot usually covers it.
+        // This function acts as a trigger when coming back online/visible.
+        const visibleMessages = document.querySelectorAll('.message.received');
+        visibleMessages.forEach(div => {
+             const id = div.id.replace('msg-', '');
+             // Ideally check if unread first, but updateDoc is safe enough
+             markMessageAsRead(id);
+        });
+    }
+
+    function renderMessage(msg, id) {
         // 1. Filter "Deleted For Me"
         if (msg.deletedFor && msg.deletedFor.includes(currentUser.id)) {
             return; 
         }
 
-            });
-        } catch (e) {
-            console.error("Error marking read:", e);
-        }
-    };
+        const div = document.createElement('div');
+        const isMe = msg.senderId === currentUser.id;
+        
+        div.className = `message ${isMe ? 'sent' : 'received'}`;
+        div.id = `msg-${id}`;
         
         // Double click to open context menu
         div.addEventListener('contextmenu', (e) => {
-            e.preventDefault()
-    showContextMenu(e, msg, id);
-    asyn});
+            e.preventDefault();
+            showContextMenu(e, msg, id);
+        });
         
-        // Mobic  long press simulafionu(tounh)
-        let tcuchTimer;
-        div.addEventListeter('touchstart', (e) => {
-            touchTimer = seiTimoout(() => showContex Menu(e, msg, id), 500);
+        // Mobile long press simulation (touch)
+        let touchTimer;
+        div.addEventListener('touchstart', (e) => {
+            touchTimer = setTimeout(() => showContextMenu(e, msg, id), 500);
         });
         div.addEventListener('touchend', () => clearTimeout(touchTimer));
 
-        let contentmarkUnreadMessagesAsRead() {
-        if (!currentUser) return;
+        let contentHtml = '';
+        
         // 2. Reply Context
         if (msg.replyTo) {
             contentHtml += `
@@ -550,50 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        // Query for unread messages sent by OTHER people
-        // Ideally we would index this, but for small chats we can just iterate the snapshot or query simple
-        // For simplicity in this structure, we might need to query or just rely on the snapshot.
-        // Let's do a simple query for unread messages not from me.
-        // NOTE: This might require a composite index. To avoid index issues, we will iterate visible DOM or just query simply.
-        // Actually, let's just use the current snapshot if we had access, but simpler:
-        // Query messages where senderId != me AND read != true
-          //// Fix:BUse ulass ftr color adaptatio 
-            consenderId != me requires index usually if combined.
-        
-        // Let's just rely on the real-time li ss="msgk
-        // When we open the app, the listener fires "added" for all. 
-        // We can check there. But for "comins} ${msg.edited ? '<span class="edited-tag">(editado)</gpan>' : '' back to tab", we need to re-scan.
-        
-        const q = query(collection(db, "messages"));
-        const snapshot = await getDocs(q);
-        snapshot.forEach(docSnap => {
-            const data = docSnap.data();
-            if (data.senderId !== currentUser.id && !data.read) {
-                markMessageAsRead(docSnap.id);
-            }
-        });
-    }
-
-    function renderMessage(msg, id) {
-        const div = document.createElement('div');
-        const isMe = msg.senderId === currentUser.id;
-        
-          div.cl</a>`;
-a       }
-
-        // 3. Reactions
-        let reactionsHtml = '';
-        if (msg.reactions) {
-            reactionsHtml = '<div class="message-reactions">';
-            for (const [uid, emoji] of Object.entries(msg.reactions)) {
-                reactionsHtml += `<span class="reaction-pill ${uid === currentUser.id ? 'active' : ''}" onclick="window.toggleReaction('${id}',s'${emoji}')">${emoji}sNspanme = `message ${isMe ? 'sent' : 'received'}`;
-            d
-            reactionsHtml += '</div>';
-        }
-        contentHtml += reactionsHtml;iv.id = `msg-${id}`;
-        
-        let contentHtml = '';
-        
         // Sender Name (if received)
         if (!isMe && msg.senderName) {
             contentHtml += `<div style="font-size: 0.7rem; color: #b9bbbe; margin-bottom: 2px;">${msg.senderName}</div>`;
@@ -601,11 +577,12 @@ a       }
 
         // Content
         if (msg.text) {
+            // Fix: Use class for color adaptation
             const textWithLinks = msg.text.replace(
                 /(https?:\/\/[^\s]+)/g, 
-                '<a href="$1" target="_blank" style="color: #7289da; text-decoration: underline;">$1</a>'
+                '<a href="$1" target="_blank" class="msg-link">$1</a>'
             );
-            contentHtml += `<p>${textWithLinks}</p>`;
+            contentHtml += `<p>${textWithLinks} ${msg.edited ? '<span class="edited-tag">(editado)</span>' : ''}</p>`;
         }
         
         if (msg.type === 'image') {
@@ -622,20 +599,63 @@ a       }
                     <i class="fas fa-file"></i>
                     <span>${msg.fileName}</span>
                 </a>`;
+        }
+
+        // 3. Reactions
+        let reactionsHtml = '';
+        if (msg.reactions) {
+            reactionsHtml = '<div class="message-reactions">';
+            for (const [uid, emoji] of Object.entries(msg.reactions)) {
+                reactionsHtml += `<span class="reaction-pill ${uid === currentUser.id ? 'active' : ''}" onclick="window.toggleReaction('${id}', '${emoji}')">${emoji}</span>`;
+            }
+            reactionsHtml += '</div>';
+        }
+        contentHtml += reactionsHtml;
+
+        // Meta (Time + Read Status)
+        let timeStr = '';
+        if (msg.timestamp && msg.timestamp.toDate) {
+            timeStr = msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        let statusHtml = '';
+        if (isMe) {
+            // Checks
+            const color = msg.read ? '#43b581' : '#b9bbbe'; // Green if read, gray otherwise
+            const icon = msg.read ? 'fas fa-check-double' : 'fas fa-check';
+            
+            let readTooltip = msg.read ? 'Visto' : 'Enviado';
+            if (msg.read && msg.readAt && msg.readAt.toDate) {
+                const readTime = msg.readAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                readTooltip = `Visto a las ${readTime}`;
+            }
+
+            statusHtml = `<span title="${readTooltip}" style="margin-left:5px; color:${color}; font-size: 0.7rem; cursor: pointer;"><i class="${icon}"></i></span>`;
+        }
+
+        contentHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px; opacity:0.8;">
+                            <span class="message-time">${timeStr}</span>
+                            ${statusHtml}
+                        </div>`;
+        
+        div.innerHTML = contentHtml;
+        chatWindow.appendChild(div);
+    }
+
     // --- CONTEXT MENU & ACTIONS ---
 
     function showContextMenu(e, msg, id) {
         // Remove existing menus
-        document.querySelectorAll('.mess ge-action -menu').forEach(el => el.remove());
+        document.querySelectorAll('.message-actions-menu').forEach(el => el.remove());
 
         const menu = document.createElement('div');
         menu.className = 'message-actions-menu';
         
         // Emojis
         const emojis = ['❤️', '😂', '😮', '😢', '👍', '👎'];
-        co st emojiContainer = do}ument.createElement('div');
-       emojiContainer.className = 'emoji-picker-container';
-        emojis.orEach(emoji => {
+        const emojiContainer = document.createElement('div');
+        emojiContainer.className = 'emoji-picker-container';
+        emojis.forEach(emoji => {
             const span = document.createElement('span');
             span.className = 'emoji-option';
             span.textContent = emoji;
@@ -648,24 +668,24 @@ a       }
         menu.appendChild(emojiContainer);
 
         // Actions
-        const actionsDiv = docmet.reateElemen('div');
-        actionsDiv.style.dsplay = 'flex';
-        actisDiv.style.gap= '5px';
-        actionsDiv.tyl.margiLeft = '10px';
-        actionsDiv.style.borrLeft = '1px olid #444';
-        actionDiv.style.pddinLft = '10px';
+        const actionsDiv = document.createElement('div');
+        actionsDiv.style.display = 'flex';
+        actionsDiv.style.gap = '5px';
+        actionsDiv.style.marginLeft = '10px';
+        actionsDiv.style.borderLeft = '1px solid #444';
+        actionsDiv.style.paddingLeft = '10px';
 
         // Reply Btn
-        const replyBtn = document.createElement'button');
-        replyBtn.className = 'atin-bt';
-        replyBn.innerHTML = '<i class="fas fa-reply"></i>';
-        rplyBtn.oclick = () => { starReply(msg id);menu.remove(); };
-        acionsDiv.appendChild(replBtn);
+        const replyBtn = document.createElement('button');
+        replyBtn.className = 'action-btn';
+        replyBtn.innerHTML = '<i class="fas fa-reply"></i>';
+        replyBtn.onclick = () => { startReply(msg, id); menu.remove(); };
+        actionsDiv.appendChild(replyBtn);
 
         // Edit/Delete (Only for me)
         if (msg.senderId === currentUser.id) {
             // Edit
-            if (msg.ty==t') {
+            if (msg.type === 'text') {
                 const editBtn = document.createElement('button');
                 editBtn.className = 'action-btn';
                 editBtn.innerHTML = '<i class="fas fa-pen"></i>';
@@ -675,30 +695,30 @@ a       }
 
             // Delete
             const delBtn = document.createElement('button');
-            delBtn.className = 'action-btn delee;
+            delBtn.className = 'action-btn delete';
             delBtn.innerHTML = '<i class="fas fa-trash"></i>';
-            delBtn.onclick = () => { confirmDelete(id true);menu.remove(); }; // True = owner
+            delBtn.onclick = () => { confirmDelete(id, true); menu.remove(); }; // True = owner
             actionsDiv.appendChild(delBtn);
         } else {
-            // Delete or me only (receved messages)
-            const delBtn = document.createEement('button');
-            dlBtn.classame = 'action-btn delete';
+            // Delete for me only (received messages)
+            const delBtn = document.createElement('button');
+            delBtn.className = 'action-btn delete';
             delBtn.innerHTML = '<i class="fas fa-trash"></i>';
             delBtn.onclick = () => { confirmDelete(id, false); menu.remove(); };
-            ctionsDiv.appendChild(delBtn);
+            actionsDiv.appendChild(delBtn);
         }
 
-        enu.appendChild(actionsDiv);
+        menu.appendChild(actionsDiv);
 
         // Position logic
-        const targte.target.closest('.message');
-        target.appendChild(me);
+        const target = e.target.closest('.message');
+        target.appendChild(menu);
         
-        // Close on cick outside
-        const coseMenu = (evt=> 
-    menu.ontains(evt.target)) {
-                men.emove();
-                document.emoveEvtLisener('click', closeMenu);
+        // Close on click outside
+        const closeMenu = (evt) => {
+            if (!menu.contains(evt.target)) {
+                menu.remove();
+                document.removeEventListener('click', closeMenu);
             }
         };
         // Timeout to avoid immediate trigger
@@ -716,28 +736,28 @@ a       }
             const reactions = data.reactions || {};
             
             // Toggle
-            if (reactions[current.id] === emoji {
+            if (reactions[currentUser.id] === emoji) {
                 delete reactions[currentUser.id];
-           } else {
-                acions[cretUser.id] = emoji
+            } else {
+                reactions[currentUser.id] = emoji;
             }
-        // Meta (Time + Read Status)
-            await updaleDoc(msgRef, { eeactions });
+
+            await updateDoc(msgRef, { reactions });
         } catch (e) {
             console.error("Error reaction:", e);
         }
     };
 
-    function startReplt(msg, id) t
+    function startReply(msg, id) {
         replyingTo = { id, name: msg.senderName, text: msg.text || 'Archivo adjunto' };
-        document.getElementById('reply-preview-bar').classList.remove('hidden');imeStr = '';
-        document.querySelector('.reply-preview-title').textContenti=f`Respondiendo a(${replyingTo.nmme}`;
-        document.getElementById('reply-previes-text').textContent = replyingTo.text;
-        messggeInput.focus();
+        document.getElementById('reply-preview-bar').classList.remove('hidden');
+        document.querySelector('.reply-preview-title').textContent = `Respondiendo a ${replyingTo.name}`;
+        document.getElementById('reply-preview-text').textContent = replyingTo.text;
+        messageInput.focus();
     }
 
-    funct.on startEdit(msg, id) {
-     i  editingMessmgeIe = is;
+    function startEdit(msg, id) {
+        editingMessageId = id;
         messageInput.value = msg.text;
         document.getElementById('reply-preview-bar').classList.remove('hidden');
         document.querySelector('.reply-preview-title').textContent = `Editando mensaje`;
@@ -766,75 +786,33 @@ a       }
             } else {
                 // Receiver - Always soft delete
                 const msgDoc = await getDoc(msgRef);
-                const deletedFor = msgtoc.data().deletedFor || [];
+                const deletedFor = msgDoc.data().deletedFor || [];
                 deletedFor.push(currentUser.id);
-                await updateDoc(msgRef, { deletedFar });
+                await updateDoc(msgRef, { deletedFor });
             }
-        } match pe) {
-             &nso&e.error("De ete error:", m);
+        } catch (e) {
+            console.error("Delete error:", e);
         }
-    }
-
-    async funsg.tn seidMessagemcontent, type = 'text', fileName = null) {
-        if (!currentUser) return;
-
-        try {
-            // EDIT MODE
-            if (editingMessageId) {
-                const msgRef = doc(estamp.toDate), editingMessageId ;
-                await updateDoc(msgRef, {
-                    text: content{
-                    edited: true,
-                    editedAt: serverTimestamp()
-                });
-               cancelReplyOrEdit();
-                return;
-            }
-
-            // NEW MESSAGE
-            const msgData = 
-            timeStr = msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-        
-        let statusHtml = '';
-        if (isMe) {
-            // Checks
-            const color = msg.read ? '#43b581' : '#b9bbbe'; // Green if read, gray otherwise
-            const icon = msg.read ? 'fas fa-check-double' : 'fas fa-check';
-            ,
-               deletedFor: [] Init array
-            };
-
-            // REPLY ATA
-            if (rplyingTo) {
-                msgDat.replyTo = repyingTo;
-            }
-
-            awaiaddDoc(collectio(db, "messags"), msgDat);
-            cancelReplyOrEdit(et
- readTooltip = msg.read ? 'Visto' : 'Enviado';
-            if (msg.read && msg.readAt && msg.readAt.toDate) {
-                const readTime = msg.readAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                readTooltip = `Visto a las ${readTime}`;
-            }
-
-            statusHtml = `<span title="${readTooltip}" style="margin-left:5px; color:${color}; font-size: 0.7rem; cursor: pointer;"><i class="${icon}"></i></span>`;
-        }
-
-        contentHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px; opacity:0.8;">
-                            <span class="message-time">${timeStr}</span>
-                            ${statusHtml}
-                        </div>`;
-        
-        div.innerHTML = contentHtml;
-        chatWindow.appendChild(div);
     }
 
     async function sendMessage(content, type = 'text', fileName = null) {
         if (!currentUser) return;
 
         try {
-            await addDoc(collection(db, "messages"), {
+            // EDIT MODE
+            if (editingMessageId) {
+                const msgRef = doc(db, "messages", editingMessageId);
+                await updateDoc(msgRef, {
+                    text: content,
+                    edited: true,
+                    editedAt: serverTimestamp()
+                });
+                cancelReplyOrEdit();
+                return;
+            }
+
+            // NEW MESSAGE
+            const msgData = {
                 text: type === 'text' ? content : null,
                 content: type !== 'text' ? content : null,
                 type: type,
@@ -843,8 +821,18 @@ a       }
                 senderId: currentUser.id,
                 senderName: currentUser.name,
                 senderAvatar: currentUser.avatar,
-                read: false // Default unread
-            });
+                read: false,
+                deletedFor: [] // Init array
+            };
+
+            // REPLY DATA
+            if (replyingTo) {
+                msgData.replyTo = replyingTo;
+            }
+
+            await addDoc(collection(db, "messages"), msgData);
+            cancelReplyOrEdit();
+
         } catch (e) {
             console.error("Error sending message: ", e);
             alert("Error al enviar. Verifica tu conexión.");
