@@ -1,0 +1,251 @@
+document.addEventListener('DOMContentLoaded', () => {
+    // Configuration
+    const CHAT_PASSWORD = "16402080077290"; // Password from memory/default
+    const STORAGE_KEY = 'private_chat_messages';
+    const LOGIN_KEY = 'private_chat_auth';
+    
+    // DOM Elements
+    const loginScreen = document.getElementById('login-screen');
+    const chatApp = document.getElementById('chat-app');
+    const passwordInput = document.getElementById('password-input');
+    const loginBtn = document.getElementById('login-btn');
+    const errorMsg = document.getElementById('error-msg');
+    
+    const chatWindow = document.getElementById('chat-window');
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const fileInput = document.getElementById('file-input');
+    const recordBtn = document.getElementById('record-btn');
+    const clearBtn = document.getElementById('clear-chat');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // State
+    let mediaRecorder;
+    let audioChunks = [];
+    let isRecording = false;
+
+    // --- Authentication ---
+    
+    function checkAuth() {
+        if (localStorage.getItem(LOGIN_KEY) === 'true') {
+            showChat();
+        }
+    }
+
+    function login() {
+        if (passwordInput.value === CHAT_PASSWORD) {
+            localStorage.setItem(LOGIN_KEY, 'true');
+            showChat();
+            passwordInput.value = '';
+            errorMsg.classList.add('hidden');
+        } else {
+            errorMsg.classList.remove('hidden');
+            passwordInput.classList.add('shake');
+            setTimeout(() => passwordInput.classList.remove('shake'), 500);
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem(LOGIN_KEY);
+        loginScreen.classList.remove('hidden');
+        chatApp.classList.add('hidden');
+    }
+
+    function showChat() {
+        loginScreen.classList.add('hidden');
+        chatApp.classList.remove('hidden');
+        scrollToBottom();
+    }
+
+    loginBtn.addEventListener('click', login);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') login();
+    });
+    logoutBtn.addEventListener('click', logout);
+
+    // --- Chat Functionality ---
+
+    function loadMessages() {
+        const messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        messages.forEach(msg => renderMessage(msg));
+    }
+
+    function saveMessage(msg) {
+        const messages = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        messages.push(msg);
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+        } catch (e) {
+            alert('Local Storage is full! Some older messages might be needed to be cleared.');
+        }
+    }
+
+    function renderMessage(msg) {
+        const div = document.createElement('div');
+        div.className = `message ${msg.sender === 'me' ? 'sent' : 'received'}`;
+        
+        let contentHtml = '';
+        
+        // Text
+        if (msg.text) {
+            // Detect links
+            const textWithLinks = msg.text.replace(
+                /(https?:\/\/[^\s]+)/g, 
+                '<a href="$1" target="_blank" style="color: #7289da; text-decoration: underline;">$1</a>'
+            );
+            contentHtml += `<p>${textWithLinks}</p>`;
+        }
+        
+        // Image
+        if (msg.type === 'image') {
+            contentHtml += `<img src="${msg.content}" alt="Image" onclick="window.open(this.src)">`;
+        }
+        
+        // Audio
+        if (msg.type === 'audio') {
+            contentHtml += `<audio controls src="${msg.content}"></audio>`;
+        }
+        
+        // File
+        if (msg.type === 'file') {
+            contentHtml += `
+                <a href="${msg.content}" download="${msg.fileName}" class="file-attachment">
+                    <i class="fas fa-file"></i>
+                    <span>${msg.fileName}</span>
+                </a>`;
+        }
+
+        const time = new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        contentHtml += `<span class="message-time">${time}</span>`;
+        
+        div.innerHTML = contentHtml;
+        chatWindow.appendChild(div);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function sendMessage(content, type = 'text', fileName = null) {
+        const msg = {
+            id: Date.now(),
+            text: type === 'text' ? content : null,
+            content: type !== 'text' ? content : null,
+            type: type,
+            fileName: fileName,
+            timestamp: new Date().toISOString(),
+            sender: 'me' // In a real app, this would depend on the user
+        };
+        
+        renderMessage(msg);
+        saveMessage(msg);
+    }
+
+    // --- Event Listeners ---
+
+    sendBtn.addEventListener('click', () => {
+        const text = messageInput.value.trim();
+        if (text) {
+            sendMessage(text);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+    });
+
+    messageInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendBtn.click();
+        }
+    });
+
+    // Auto-resize textarea
+    messageInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
+    clearBtn.addEventListener('click', () => {
+        if(confirm('¿Estás seguro de que quieres borrar todo el historial?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            chatWindow.innerHTML = `
+                <div class="welcome-message">
+                    <i class="fas fa-shield-alt"></i>
+                    <p>Chat encriptado iniciado. Los mensajes se guardan localmente.</p>
+                </div>
+            `;
+        }
+    });
+
+    // --- File Handling ---
+
+    fileInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files.length > 0) {
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const result = e.target.result;
+                    if (file.type.startsWith('image/')) {
+                        sendMessage(result, 'image');
+                    } else {
+                        sendMessage(result, 'file', file.name);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+            fileInput.value = ''; // Reset
+        }
+    });
+
+    // --- Audio Recording ---
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        recordBtn.addEventListener('click', async () => {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (e) => {
+                        audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const reader = new FileReader();
+                        reader.readAsDataURL(audioBlob);
+                        reader.onloadend = () => {
+                            const base64Audio = reader.result;
+                            sendMessage(base64Audio, 'audio');
+                        };
+                        
+                        // Stop all tracks
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.classList.add('recording');
+                } catch (err) {
+                    console.error('Error accessing microphone:', err);
+                    alert('No se pudo acceder al micrófono.');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordBtn.classList.remove('recording');
+            }
+        });
+    } else {
+        recordBtn.style.display = 'none';
+    }
+
+    // Init
+    checkAuth();
+    if(localStorage.getItem(LOGIN_KEY) === 'true') {
+        loadMessages();
+    }
+});

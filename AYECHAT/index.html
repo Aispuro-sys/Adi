@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Privado</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-container">
+            <h2>¿Quién eres?</h2>
+            <div class="user-selection">
+                <div class="user-card" id="login-eduardo" data-user="eduardo">
+                    <div class="avatar-large"><img src="https://ui-avatars.com/api/?name=Eduardo&background=random" id="img-login-eduardo"></div>
+                    <h3>Eduardo</h3>
+                </div>
+                <div class="user-card" id="login-adilene" data-user="adilene">
+                    <div class="avatar-large"><img src="https://ui-avatars.com/api/?name=Adilene&background=random" id="img-login-adilene"></div>
+                    <h3>Adilene</h3>
+                </div>
+            </div>
+            
+            <div id="password-section" class="hidden">
+                <p id="selected-user-name">Ingresa tu contraseña</p>
+                <input type="password" id="password-input" placeholder="Contraseña..." autofocus>
+                <div class="login-actions">
+                    <button id="back-btn" class="secondary-btn">Atrás</button>
+                    <button id="login-btn">Entrar</button>
+                </div>
+                <p id="error-msg" class="hidden">Contraseña incorrecta</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chat-app" class="hidden">
+        <header class="chat-header">
+            <div class="user-info">
+                <div class="avatar">
+                    <img id="current-user-avatar" src="" alt="">
+                </div>
+                <div class="user-details">
+                    <h3 id="current-user-name">Usuario</h3>
+                    <span class="status">En línea</span>
+                </div>
+            </div>
+            <div class="actions">
+                <a href="../index.html" class="icon-btn" title="Volver al Inicio" style="text-decoration:none; color:inherit; display:inline-flex; align-items:center; justify-content:center;"><i class="fas fa-home"></i></a>
+                <button id="settings-btn" title="Configuración"><i class="fas fa-cog"></i></button>
+                <button id="clear-chat" title="Limpiar pantalla"><i class="fas fa-eraser"></i></button>
+                <button id="logout-btn" title="Salir"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </header>
+
+        <div id="chat-window" class="chat-window">
+            <!-- Messages will appear here -->
+        </div>
+
+        <div class="chat-input-area">
+            <div class="media-controls">
+                <label for="file-input" class="icon-btn" title="Enviar archivo/imagen">
+                    <i class="fas fa-paperclip"></i>
+                </label>
+                <input type="file" id="file-input" hidden multiple>
+            </div>
+            
+            <textarea id="message-input" placeholder="Escribe un mensaje..." rows="1"></textarea>
+            
+            <button id="record-btn" class="icon-btn record-btn" title="Grabar audio">
+                <i class="fas fa-microphone"></i>
+            </button>
+            
+            <button id="send-btn" class="send-btn">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>Editar Perfil</h2>
+            <div class="settings-form">
+                <div class="avatar-upload">
+                    <img id="settings-avatar-preview" src="" alt="Avatar">
+                    <label for="avatar-input" class="upload-btn"><i class="fas fa-camera"></i> Cambiar Foto</label>
+                    <input type="file" id="avatar-input" accept="image/*" hidden>
+                </div>
+                
+                <div class="form-group">
+                    <label>Apodo / Nombre</label>
+                    <input type="text" id="settings-nickname">
+                </div>
+
+                <div class="form-group">
+                    <label>Fondo del Chat</label>
+                    <div class="bg-upload-container">
+                        <label for="bg-input" class="secondary-btn" style="text-align:center; display:block; cursor:pointer;">
+                            <i class="fas fa-image"></i> Cambiar Fondo
+                        </label>
+                        <input type="file" id="bg-input" accept="image/*" hidden>
+                        <button id="reset-bg-btn" class="icon-btn" title="Restaurar fondo original" style="margin-left:10px;"><i class="fas fa-undo"></i></button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nueva Contraseña (Opcional)</label>
+                    <input type="password" id="settings-password" placeholder="Dejar vacío para no cambiar">
+                </div>
+
+                <button id="save-settings-btn">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js" type="module"></script>
+</body>
+</html>
