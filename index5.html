@@ -652,7 +652,7 @@
     /* Responsive */
     @media (max-width: 600px) {
       .hero-title { font-size: 2.2rem; }
-      .letter-paper { width: 100%; height: 100%; border-radius: 0; padding: 30px; }
+      .letter-paper { width: 100%; height: 100%; border-radius: 0; padding: 30px 30px 80px 30px; }
       
       .nav-bar { 
         width: 95%; 
@@ -665,10 +665,14 @@
       
       .passion-card { 
         width: 280px; 
-        height: 420px; 
-        padding: 25px; 
+        height: 360px; 
+        padding: 20px; 
       }
-      .passion-text { font-size: 1.4rem; }
+      .passion-text { font-size: 1.25rem; }
+      
+      .carousel-section {
+        padding-bottom: 80px; 
+      }
       
       .carousel-track-container { 
         width: 300px; /* 280 card + 20 gap */
@@ -957,7 +961,8 @@
 
   <!-- PDF VIEWER -->
   <div id="pdfModal" class="pdf-modal">
-    <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <a href="Libro/El_principito-Antoine_de_Saint-Exupery.pdf" target="_blank" class="close-letter" style="text-decoration:none; background:rgba(255,255,255,0.15);">📄 Abrir Externo</a>
       <button class="close-letter" style="color:#fff; position:static;" onclick="closeBook()">Cerrar</button>
     </div>
     <iframe class="pdf-frame" src="Libro/El_principito-Antoine_de_Saint-Exupery.pdf"></iframe>
