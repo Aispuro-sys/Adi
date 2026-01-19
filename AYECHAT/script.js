@@ -74,10 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     
     async function init() {
+        // Load avatars for login screen immediately
+        loadLoginAvatars();
+
         // Check if cached login exists
         const cachedUserId = localStorage.getItem(LOGIN_KEY);
         if (cachedUserId) {
             await loadUserAndStart(cachedUserId);
+        }
+    }
+
+    async function loadLoginAvatars() {
+        try {
+            const users = ['eduardo', 'adilene'];
+            for (const userId of users) {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (userData.avatar) {
+                        const imgEl = document.getElementById(`img-login-${userId}`);
+                        if (imgEl) imgEl.src = userData.avatar;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error loading login avatars:", e);
         }
     }
 
