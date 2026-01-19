@@ -491,3 +491,70 @@ textarea:focus {
         max-width: 85%;
     }
 }
+
+/* Minimized Mode / Floating Button */
+#floating-chat-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    background: var(--chat-bg);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid var(--primary-color);
+}
+
+#floating-chat-btn:hover {
+    transform: scale(1.1);
+}
+
+#floating-chat-btn .avatar-small {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+
+#floating-chat-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #b9bbbe; /* Default offline */
+    border: 2px solid var(--chat-bg);
+}
+
+.status-dot.online {
+    background-color: #43b581;
+}
+
+#minimize-chat-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 5px; /* Alignment fix */
+    transition: color 0.2s;
+}
+
+#minimize-chat-btn:hover {
+    color: var(--text-color);
+}

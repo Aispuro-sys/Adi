@@ -21,7 +21,10 @@ const CLOUDINARY_UPLOAD_PRESET = 'AYECHAT';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Constants
-    const DEFAULT_PASSWORD = "16402080077290"; 
+    const DEFAULT_PASSWORDS = {
+        'eduardo': "16402080077290",
+        'adilene': "164020"
+    };
     const LOGIN_KEY = 'private_chat_user_id';
     
     // DOM Elements - Login
@@ -44,6 +47,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const clearBtn = document.getElementById('clear-chat');
     const logoutBtn = document.getElementById('logout-btn');
     const settingsBtn = document.getElementById('settings-btn');
+    const minimizeBtn = document.getElementById('minimize-chat-btn');
+    const floatingBtn = document.getElementById('floating-chat-btn');
+    const floatingAvatar = document.getElementById('floating-avatar');
+    const floatingStatus = document.getElementById('floating-status-indicator');
     
     // DOM Elements - Header Info
     const currentUserAvatar = document.getElementById('current-user-avatar');
@@ -71,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRecording = false;
     let messagesUnsubscribe = null;
     let partnerUnsubscribe = null;
+    let currentUserUnsubscribe = null;
     let typingTimeout = null;
 
     // --- INITIALIZATION ---
@@ -146,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentUser = { 
                     id: userId, 
                     name: userId === 'eduardo' ? 'Eduardo' : 'Adilene',
-                    password: DEFAULT_PASSWORD,
+                    password: DEFAULT_PASSWORDS[userId] || "123456",
                     avatar: `https://ui-avatars.com/api/?name=${userId}&background=random`,
                     chatBackground: '',
                     online: true,
@@ -173,7 +181,74 @@ document.addEventListener('DOMContentLoaded', () => {
         await setDoc(doc(db, "users", userId), defaultData);
     }
 
-    // ... (Login flow remains same) ...
+    // --- LOGIN FLOW ---
+
+    userCards.forEach(card => {
+        card.addEventListener('click', () => {
+            selectedLoginUser = card.dataset.user;
+            
+            // UI Update
+            document.querySelector('.user-selection').classList.add('hidden');
+            passwordSection.classList.remove('hidden');
+            selectedUserNameDisplay.textContent = `Hola ${selectedLoginUser.charAt(0).toUpperCase() + selectedLoginUser.slice(1)}, ingresa tu clave:`;
+            passwordInput.value = '';
+            passwordInput.focus();
+            errorMsg.classList.add('hidden');
+        });
+    });
+
+    backBtn.addEventListener('click', () => {
+        selectedLoginUser = null;
+        passwordSection.classList.add('hidden');
+        document.querySelector('.user-selection').classList.remove('hidden');
+    });
+
+    async function performLogin() {
+        if (!selectedLoginUser) return;
+        
+        const pwd = passwordInput.value;
+        if (!pwd) return;
+
+        loginBtn.textContent = '...';
+        
+        try {
+            let userDoc = await getDoc(doc(db, "users", selectedLoginUser));
+            
+            // Create if not exists (Lazy init)
+            if (!userDoc.exists()) {
+                await createDefaultUser(selectedLoginUser);
+                userDoc = await getDoc(doc(db, "users", selectedLoginUser));
+            }
+
+            const userData = userDoc.data();
+            
+            if (userData.password === pwd) {
+                currentUser = { id: selectedLoginUser, ...userData };
+                localStorage.setItem(LOGIN_KEY, currentUser.id);
+                showChatInterface();
+            } else if (selectedLoginUser === 'adilene' && pwd === DEFAULT_PASSWORDS['adilene'] && userData.password === "16402080077290") {
+                // Migration
+                await updateDoc(doc(db, "users", 'adilene'), { password: DEFAULT_PASSWORDS['adilene'] });
+                currentUser = { id: selectedLoginUser, ...userData, password: DEFAULT_PASSWORDS['adilene'] };
+                localStorage.setItem(LOGIN_KEY, currentUser.id);
+                showChatInterface();
+            } else {
+                errorMsg.classList.remove('hidden');
+                passwordInput.classList.add('shake');
+                setTimeout(() => passwordInput.classList.remove('shake'), 500);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Error al intentar entrar. Verifica la consola.");
+        }
+        
+        loginBtn.textContent = 'Entrar';
+    }
+
+    loginBtn.addEventListener('click', performLogin);
+    passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') performLogin();
+    });
 
     function showChatInterface() {
         loginScreen.classList.add('hidden');
@@ -184,6 +259,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Setup Partner Info in Header
         setupPartnerHeader();
+        
+        // Setup Current User Listener (Shared Background & Real-time updates)
+        setupCurrentUserListener();
         
         // Apply Background
         applyChatBackground();
@@ -198,6 +276,23 @@ document.addEventListener('DOMContentLoaded', () => {
         if ("Notification" in window && Notification.permission !== "granted") {
             Notification.requestPermission();
         }
+    }
+
+    function setupCurrentUserListener() {
+        if (!currentUser) return;
+
+        if (currentUserUnsubscribe) currentUserUnsubscribe();
+
+        currentUserUnsubscribe = onSnapshot(doc(db, "users", currentUser.id), (doc) => {
+            if (doc.exists()) {
+                const newData = doc.data();
+                // Update local state
+                currentUser = { ...currentUser, ...newData };
+                
+                // Check Background Sync
+                applyChatBackground();
+            }
+        });
     }
 
     function setupPartnerHeader() {
@@ -222,14 +317,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusEl.textContent = 'Escribiendo...';
                     statusEl.style.color = '#7289da'; // Primary blueish color
                     statusEl.style.fontStyle = 'italic';
+                    floatingStatus.className = 'status-dot online'; // Use online color for activity
+                    floatingStatus.style.backgroundColor = '#7289da';
                 } else if (partnerData.activityStatus === 'recording') {
                     statusEl.textContent = 'Grabando audio...';
                     statusEl.style.color = '#ff4757'; // Red
                     statusEl.style.fontStyle = 'italic';
+                    floatingStatus.className = 'status-dot online';
+                    floatingStatus.style.backgroundColor = '#ff4757';
                 } else if (partnerData.online) {
                     statusEl.textContent = 'En línea';
                     statusEl.style.color = '#43b581';
                     statusEl.style.fontStyle = 'normal';
+                    floatingStatus.className = 'status-dot online';
+                    floatingStatus.style.backgroundColor = '#43b581';
                 } else {
                     let lastSeenText = 'Desconectado';
                     if (partnerData.lastSeen) {
@@ -239,6 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     statusEl.textContent = lastSeenText;
                     statusEl.style.color = '#b9bbbe';
                     statusEl.style.fontStyle = 'normal';
+                    floatingStatus.className = 'status-dot';
+                    floatingStatus.style.backgroundColor = '#b9bbbe';
                 }
             }
         });
@@ -256,8 +359,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUser = null;
         if (messagesUnsubscribe) messagesUnsubscribe();
         if (partnerUnsubscribe) partnerUnsubscribe();
+        if (currentUserUnsubscribe) currentUserUnsubscribe();
         
         chatApp.classList.add('hidden');
+        floatingBtn.classList.add('hidden'); // Ensure floating btn is hidden
         loginScreen.classList.remove('hidden');
         
         // Refresh avatars on login screen
@@ -274,6 +379,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ... (Profile Settings remains same) ...
 
+    // --- MINIMIZE / FLOATING CHAT ---
+
+    function minimizeChat() {
+        chatApp.classList.add('hidden');
+        floatingBtn.classList.remove('hidden');
+        
+        // Update floating avatar to partner's avatar (since header shows partner)
+        if (currentUser) {
+            const partnerId = currentUser.id === 'eduardo' ? 'adilene' : 'eduardo';
+            // We can get this from DOM or wait for listener
+            // Ideally use the cached partner info if we had it, but reading from the header img src is a quick hack
+            // or better, fetch from db/listener.
+            // Since we have the partnerUnsubscribe active, let's just use a default or current header src
+            const headerImg = document.getElementById('current-user-avatar');
+            if(headerImg) floatingAvatar.src = headerImg.src;
+        }
+    }
+
+    function maximizeChat() {
+        floatingBtn.classList.add('hidden');
+        chatApp.classList.remove('hidden');
+        scrollToBottom();
+    }
+
+    minimizeBtn.addEventListener('click', minimizeChat);
+    
+    floatingBtn.addEventListener('click', maximizeChat);
+
+    // ESC to minimize
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (!chatApp.classList.contains('hidden') && settingsModal.classList.contains('hidden')) {
+                minimizeChat();
+            } else if (!settingsModal.classList.contains('hidden')) {
+                settingsModal.classList.add('hidden');
+            }
+        }
+    });
+
+    // Sync floating status dot with partner status
+    // We'll hook this into setupPartnerHeader
+    
     // --- CHAT FUNCTIONALITY ---
 
     function subscribeToMessages() {
