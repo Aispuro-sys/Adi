@@ -1056,6 +1056,101 @@ document.addEventListener('DOMContentLoaded', () => {
         recordBtn.style.display = 'none';
     }
 
+    // --- IMAGE PASTE & PREVIEW ---
+    
+    // Paste Event on Input
+    messageInput.addEventListener('paste', (e) => {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (const item of items) {
+            if (item.type.indexOf('image') === 0) {
+                e.preventDefault();
+                const blob = item.getAsFile();
+                showImagePreview(blob);
+                return;
+            }
+        }
+    });
+
+    // Global Paste Event (when chat is open but input might not be focused)
+    window.addEventListener('paste', (e) => {
+        if (chatApp.classList.contains('hidden')) return;
+        if (document.activeElement === messageInput) return; // Already handled
+
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (const item of items) {
+            if (item.type.indexOf('image') === 0) {
+                e.preventDefault();
+                const blob = item.getAsFile();
+                showImagePreview(blob);
+                return;
+            }
+        }
+    });
+
+    function showImagePreview(file) {
+        // Create Modal Elements dynamically
+        const modal = document.createElement('div');
+        modal.className = 'image-preview-modal';
+        
+        const content = document.createElement('div');
+        content.className = 'image-preview-content';
+        
+        const title = document.createElement('h3');
+        title.textContent = 'Enviar imagen pegada';
+        
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        
+        const actions = document.createElement('div');
+        actions.className = 'preview-actions';
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'preview-btn cancel';
+        cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancelar';
+        cancelBtn.onclick = () => {
+            modal.remove();
+        };
+        
+        const sendBtn = document.createElement('button');
+        sendBtn.className = 'preview-btn send';
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+        sendBtn.onclick = async () => {
+            // Loading state
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            sendBtn.disabled = true;
+            cancelBtn.disabled = true;
+            
+            const url = await uploadFile(file);
+            if (url) {
+                sendMessage(url, 'image');
+                modal.remove();
+            } else {
+                // Reset on error
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+                sendBtn.disabled = false;
+                cancelBtn.disabled = false;
+            }
+        };
+        
+        actions.appendChild(cancelBtn);
+        actions.appendChild(sendBtn);
+        
+        content.appendChild(title);
+        content.appendChild(img);
+        content.appendChild(actions);
+        modal.appendChild(content);
+        
+        // Close on click outside (background)
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        document.body.appendChild(modal);
+        
+        // Focus send button for quick Enter press
+        sendBtn.focus();
+    }
+
     // Init App
     init();
 });
