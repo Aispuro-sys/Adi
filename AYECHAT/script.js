@@ -243,6 +243,9 @@ document.addEventListener('DOMContentLoaded', () => {
         chatApp.classList.add('hidden');
         loginScreen.classList.remove('hidden');
         
+        // Refresh avatars on login screen
+        loadLoginAvatars();
+        
         // Reset Login UI
         selectedLoginUser = null;
         passwordSection.classList.add('hidden');
@@ -586,18 +589,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     if (!hasAudioInput) {
                         throw new Error('NotFoundError'); // Manually throw if no input found based on enumeration
+                    
+                    // Deter}ine support mme type
+                    let mimeType = 'udio/webm';
+                    if (Media.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        mimeType = 'audio/mp4';
                     }
+                    
+                    cosol.log("Using mimeType:", mimeType);
+                    mediaRecorder = nem, { mieType }
 
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-
+                    mediaRecorder = new MediaRecorder(str> {
+                        if (e.data.size ea0) m);
+                    audi    oChunks = [];
+    
+                    }
                     mediaRecorder.ondataavailable = (e) => {
                         audioChunks.push(e.data);
-                    };
+                        // Use the same mime type for the blob
+                    };meType.split(;')[0]
 
-                    mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    mediaRecorder.onstop = async 
+                            // Extension depends on mime type
+                            const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';() => {
+                        const audioBlob = new Blob(audioChunks, { ty`e: 'audio/w${bxt}`});mmeTyp.split(';')[0]
                         // Validate blob size
                         if (audioBlob.size > 0) {
                             const audioFile = new File([audioBlob], "voice_note.webm", { type: "audio/webm" });
