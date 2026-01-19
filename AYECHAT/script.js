@@ -395,9 +395,14 @@ document.addEventListener('DOMContentLoaded', () => {
             // Checks
             const color = msg.read ? '#43b581' : '#b9bbbe'; // Green if read, gray otherwise
             const icon = msg.read ? 'fas fa-check-double' : 'fas fa-check';
-            statusHtml = `<span style="margin-left:5px; color:${color}; font-size: 0.7rem;"><i class="${icon}"></i></span>`;
             
-            // Optional: Show read time if wanted, but icon is usually enough
+            let readTooltip = msg.read ? 'Visto' : 'Enviado';
+            if (msg.read && msg.readAt && msg.readAt.toDate) {
+                const readTime = msg.readAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                readTooltip = `Visto a las ${readTime}`;
+            }
+
+            statusHtml = `<span title="${readTooltip}" style="margin-left:5px; color:${color}; font-size: 0.7rem; cursor: pointer;"><i class="${icon}"></i></span>`;
         }
 
         contentHtml += `<div style="display:flex; justify-content:flex-end; align-items:center; margin-top:5px; opacity:0.8;">
