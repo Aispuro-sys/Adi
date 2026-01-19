@@ -1,13 +1,11 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, getDoc, setDoc, updateDoc, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
 // --- CONFIGURACIÓN FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCZyJnjNAJSRoHRGLzGBDumbtGOkB55Pyo",
   authDomain: "ayechat-4f50d.firebaseapp.com",
   projectId: "ayechat-4f50d",
-  storageBucket: "ayechat-4f50d.firebasestorage.app",
   messagingSenderId: "533598786880",
   appId: "1:533598786880:web:0094638658a25b2dd616a5",
   measurementId: "G-3978XHQYQL"
@@ -16,7 +14,10 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const storage = getStorage(app);
+
+// --- CONFIGURACIÓN CLOUDINARY ---
+const CLOUDINARY_CLOUD_NAME = 'dmawscx9h';
+const CLOUDINARY_UPLOAD_PRESET = 'AYECHAT';
 
 document.addEventListener('DOMContentLoaded', () => {
     // Constants
@@ -443,15 +444,36 @@ document.addEventListener('DOMContentLoaded', () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
 
-    // --- FILE UPLOAD HELPER ---
+    // --- FILE UPLOAD HELPER (CLOUDINARY) ---
 
     async function uploadFile(file, folder = 'uploads') {
-        const storageRef = ref(storage, `${folder}/${Date.now()}_${file.name}`);
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        // folder parameter is handled by the preset or can be added to formData if signed, 
+        // but for unsigned with dynamic folders/presets, we rely on the preset configuration.
+        // We can try to pass 'folder' param if the preset allows it, but usually unsigned presets enforce specific folders.
+        // For simplicity with the provided preset, we just upload.
+
         try {
-            const snapshot = await uploadBytes(storageRef, file);
-            return await getDownloadURL(snapshot.ref);
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error.message || 'Error uploading to Cloudinary');
+            }
+
+            const data = await response.json();
+            // Prefer secure_url
+            return data.secure_url;
         } catch (error) {
-            console.error("Upload failed", error);
+            console.error("Upload failed:", error);
+            alert("Error al subir archivo: " + error.message);
             return null;
         }
     }
