@@ -80,10 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let partnerUnsubscribe = null;
     let currentUserUnsubscribe = null;
     let typingTimeout = null;
+    let replyingTo = null; // { id, name, text }
+    let editingMessageId = null; // ID of message being edited
 
     // --- INITIALIZATION ---
     
     async function init() {
+        // Inject Reply Preview Container
+        setupReplyUI();
+        
         // Load avatars for login screen immediately
         loadLoginAvatars();
         
@@ -112,6 +117,33 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('beforeunload', () => {
             if (currentUser) {
                 updateOnlineStatus(false); // Set offline on close
+    function setupReplyUI() {
+        const inputArea = document.querySelector('.chat-input-area');
+        const previewBar = document.createElement('div');
+        previewBar.id = 'reply-preview-bar';
+        previewBar.className = 'reply-preview-bar hidden';
+        previewBar.innerHTML = `
+            <div class="reply-preview-content">
+                <div class="reply-preview-title">Respondiendo a...</div>
+                <div class="reply-preview-text" id="reply-preview-text">...</div>
+            </div>
+            <button id="cancel-reply-btn" class="icon-btn"><i class="fas fa-times"></i></button>
+        `;
+        // Insert before the input container
+        inputArea.insertBefore(previewBar, inputArea.firstChild);
+        
+        document.getElementById('cancel-reply-btn').addEventListener('click', cancelReplyOrEdit);
+    }
+
+    function cancelReplyOrEdit() {
+        replyingTo = null;
+        editingMessageId = null;
+        document.getElementById('reply-preview-bar').classList.add('hidden');
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+
                 updateActivityStatus(null); // Clear typing/recording
             }
         });
@@ -482,14 +514,42 @@ document.addEventListener('DOMContentLoaded', () => {
             await updateDoc(msgRef, {
                 read: true,
                 readAt: serverTimestamp()
+        // 1. Filter "Deleted For Me"
+        if (msg.deletedFor && msg.deletedFor.includes(currentUser.id)) {
+            return; 
+        }
+
             });
         } catch (e) {
             console.error("Error marking read:", e);
         }
-    }
+    };
+        
+        // Double click to open context menu
+        div.addEventListener('contextmenu', (e) => {
+            e.preventDefault()
+    showContextMenu(e, msg, id);
+    asyn});
+        
+        // Mobic  long press simulafionu(tounh)
+        let tcuchTimer;
+        div.addEventListeter('touchstart', (e) => {
+            touchTimer = seiTimoout(() => showContex Menu(e, msg, id), 500);
+        });
+        div.addEventListener('touchend', () => clearTimeout(touchTimer));
 
-    async function markUnreadMessagesAsRead() {
+        let contentmarkUnreadMessagesAsRead() {
         if (!currentUser) return;
+        // 2. Reply Context
+        if (msg.replyTo) {
+            contentHtml += `
+                <div class="reply-context" onclick="document.getElementById('msg-${msg.replyTo.id}')?.scrollIntoView({behavior: 'smooth', block: 'center'})">
+                    <strong>${msg.replyTo.name}</strong>
+                    <span>${msg.replyTo.text}</span>
+                </div>
+            `;
+        }
+
         // Query for unread messages sent by OTHER people
         // Ideally we would index this, but for small chats we can just iterate the snapshot or query simple
         // For simplicity in this structure, we might need to query or just rely on the snapshot.
@@ -497,11 +557,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // NOTE: This might require a composite index. To avoid index issues, we will iterate visible DOM or just query simply.
         // Actually, let's just use the current snapshot if we had access, but simpler:
         // Query messages where senderId != me AND read != true
-        // But senderId != me requires index usually if combined.
+          //// Fix:BUse ulass ftr color adaptatio 
+            consenderId != me requires index usually if combined.
         
-        // Let's just rely on the real-time listener: 
+        // Let's just rely on the real-time li ss="msgk
         // When we open the app, the listener fires "added" for all. 
-        // We can check there. But for "coming back to tab", we need to re-scan.
+        // We can check there. But for "comins} ${msg.edited ? '<span class="edited-tag">(editado)</gpan>' : '' back to tab", we need to re-scan.
         
         const q = query(collection(db, "messages"));
         const snapshot = await getDocs(q);
@@ -517,8 +578,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         const isMe = msg.senderId === currentUser.id;
         
-        div.className = `message ${isMe ? 'sent' : 'received'}`;
-        div.id = `msg-${id}`;
+          div.cl</a>`;
+a       }
+
+        // 3. Reactions
+        let reactionsHtml = '';
+        if (msg.reactions) {
+            reactionsHtml = '<div class="message-reactions">';
+            for (const [uid, emoji] of Object.entries(msg.reactions)) {
+                reactionsHtml += `<span class="reaction-pill ${uid === currentUser.id ? 'active' : ''}" onclick="window.toggleReaction('${id}',s'${emoji}')">${emoji}sNspanme = `message ${isMe ? 'sent' : 'received'}`;
+            d
+            reactionsHtml += '</div>';
+        }
+        contentHtml += reactionsHtml;iv.id = `msg-${id}`;
         
         let contentHtml = '';
         
@@ -550,11 +622,177 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fas fa-file"></i>
                     <span>${msg.fileName}</span>
                 </a>`;
+    // --- CONTEXT MENU & ACTIONS ---
+
+    function showContextMenu(e, msg, id) {
+        // Remove existing menus
+        document.querySelectorAll('.mess ge-action -menu').forEach(el => el.remove());
+
+        const menu = document.createElement('div');
+        menu.className = 'message-actions-menu';
+        
+        // Emojis
+        const emojis = ['❤️', '😂', '😮', '😢', '👍', '👎'];
+        co st emojiContainer = do}ument.createElement('div');
+       emojiContainer.className = 'emoji-picker-container';
+        emojis.orEach(emoji => {
+            const span = document.createElement('span');
+            span.className = 'emoji-option';
+            span.textContent = emoji;
+            span.onclick = () => {
+                toggleReaction(id, emoji);
+                menu.remove();
+            };
+            emojiContainer.appendChild(span);
+        });
+        menu.appendChild(emojiContainer);
+
+        // Actions
+        const actionsDiv = docmet.reateElemen('div');
+        actionsDiv.style.dsplay = 'flex';
+        actisDiv.style.gap= '5px';
+        actionsDiv.tyl.margiLeft = '10px';
+        actionsDiv.style.borrLeft = '1px olid #444';
+        actionDiv.style.pddinLft = '10px';
+
+        // Reply Btn
+        const replyBtn = document.createElement'button');
+        replyBtn.className = 'atin-bt';
+        replyBn.innerHTML = '<i class="fas fa-reply"></i>';
+        rplyBtn.oclick = () => { starReply(msg id);menu.remove(); };
+        acionsDiv.appendChild(replBtn);
+
+        // Edit/Delete (Only for me)
+        if (msg.senderId === currentUser.id) {
+            // Edit
+            if (msg.ty==t') {
+                const editBtn = document.createElement('button');
+                editBtn.className = 'action-btn';
+                editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+                editBtn.onclick = () => { startEdit(msg, id); menu.remove(); };
+                actionsDiv.appendChild(editBtn);
+            }
+
+            // Delete
+            const delBtn = document.createElement('button');
+            delBtn.className = 'action-btn delee;
+            delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            delBtn.onclick = () => { confirmDelete(id true);menu.remove(); }; // True = owner
+            actionsDiv.appendChild(delBtn);
+        } else {
+            // Delete or me only (receved messages)
+            const delBtn = document.createEement('button');
+            dlBtn.classame = 'action-btn delete';
+            delBtn.innerHTML = '<i class="fas fa-trash"></i>';
+            delBtn.onclick = () => { confirmDelete(id, false); menu.remove(); };
+            ctionsDiv.appendChild(delBtn);
         }
 
+        enu.appendChild(actionsDiv);
+
+        // Position logic
+        const targte.target.closest('.message');
+        target.appendChild(me);
+        
+        // Close on cick outside
+        const coseMenu = (evt=> 
+    menu.ontains(evt.target)) {
+                men.emove();
+                document.emoveEvtLisener('click', closeMenu);
+            }
+        };
+        // Timeout to avoid immediate trigger
+        setTimeout(() => document.addEventListener('click', closeMenu), 10);
+    }
+
+    // Expose for global access (onclick handlers)
+    window.toggleReaction = async (msgId, emoji) => {
+        try {
+            const msgRef = doc(db, "messages", msgId);
+            const msgDoc = await getDoc(msgRef);
+            if (!msgDoc.exists()) return;
+
+            const data = msgDoc.data();
+            const reactions = data.reactions || {};
+            
+            // Toggle
+            if (reactions[current.id] === emoji {
+                delete reactions[currentUser.id];
+           } else {
+                acions[cretUser.id] = emoji
+            }
         // Meta (Time + Read Status)
-        let timeStr = '';
-        if (msg.timestamp && msg.timestamp.toDate) {
+            await updaleDoc(msgRef, { eeactions });
+        } catch (e) {
+            console.error("Error reaction:", e);
+        }
+    };
+
+    function startReplt(msg, id) t
+        replyingTo = { id, name: msg.senderName, text: msg.text || 'Archivo adjunto' };
+        document.getElementById('reply-preview-bar').classList.remove('hidden');imeStr = '';
+        document.querySelector('.reply-preview-title').textContenti=f`Respondiendo a(${replyingTo.nmme}`;
+        document.getElementById('reply-previes-text').textContent = replyingTo.text;
+        messggeInput.focus();
+    }
+
+    funct.on startEdit(msg, id) {
+     i  editingMessmgeIe = is;
+        messageInput.value = msg.text;
+        document.getElementById('reply-preview-bar').classList.remove('hidden');
+        document.querySelector('.reply-preview-title').textContent = `Editando mensaje`;
+        document.getElementById('reply-preview-text').textContent = msg.text;
+        sendBtn.innerHTML = '<i class="fas fa-check"></i>';
+        messageInput.focus();
+    }
+
+    async function confirmDelete(msgId, isSender) {
+        if (!confirm("¿Eliminar mensaje?")) return;
+
+        try {
+            const msgRef = doc(db, "messages", msgId);
+            
+            if (isSender) {
+                // Sender Options
+                if (confirm("¿Eliminar para todos?\nCancelar = Solo para mí")) {
+                    await deleteDoc(msgRef);
+                } else {
+                    // Soft delete for me
+                    const msgDoc = await getDoc(msgRef);
+                    const deletedFor = msgDoc.data().deletedFor || [];
+                    deletedFor.push(currentUser.id);
+                    await updateDoc(msgRef, { deletedFor });
+                }
+            } else {
+                // Receiver - Always soft delete
+                const msgDoc = await getDoc(msgRef);
+                const deletedFor = msgtoc.data().deletedFor || [];
+                deletedFor.push(currentUser.id);
+                await updateDoc(msgRef, { deletedFar });
+            }
+        } match pe) {
+             &nso&e.error("De ete error:", m);
+        }
+    }
+
+    async funsg.tn seidMessagemcontent, type = 'text', fileName = null) {
+        if (!currentUser) return;
+
+        try {
+            // EDIT MODE
+            if (editingMessageId) {
+                const msgRef = doc(estamp.toDate), editingMessageId ;
+                await updateDoc(msgRef, {
+                    text: content{
+                    edited: true,
+                    editedAt: serverTimestamp()
+                });
+               cancelReplyOrEdit();
+                return;
+            }
+
+            // NEW MESSAGE
+            const msgData = 
             timeStr = msg.timestamp.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
         
@@ -563,8 +801,18 @@ document.addEventListener('DOMContentLoaded', () => {
             // Checks
             const color = msg.read ? '#43b581' : '#b9bbbe'; // Green if read, gray otherwise
             const icon = msg.read ? 'fas fa-check-double' : 'fas fa-check';
-            
-            let readTooltip = msg.read ? 'Visto' : 'Enviado';
+            ,
+               deletedFor: [] Init array
+            };
+
+            // REPLY ATA
+            if (rplyingTo) {
+                msgDat.replyTo = repyingTo;
+            }
+
+            awaiaddDoc(collectio(db, "messags"), msgDat);
+            cancelReplyOrEdit(et
+ readTooltip = msg.read ? 'Visto' : 'Enviado';
             if (msg.read && msg.readAt && msg.readAt.toDate) {
                 const readTime = msg.readAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 readTooltip = `Visto a las ${readTime}`;
