@@ -360,6 +360,21 @@ body, html {
     word-wrap: break-word;
     font-size: 0.95rem;
     line-height: 1.4;
+    transition: background 0.2s; /* Visual feedback */
+}
+
+/* Links inside messages */
+.msg-link {
+    text-decoration: underline;
+    word-break: break-all;
+}
+
+.message.sent .msg-link {
+    color: #e0e0e0; /* Lighter color for better contrast on blue */
+}
+
+.message.received .msg-link {
+    color: #7289da;
 }
 
 .message.sent {
@@ -367,6 +382,147 @@ body, html {
     background: var(--sent-msg-bg);
     border-bottom-right-radius: 2px;
 }
+
+/* ... existing code ... */
+
+/* Context Menu / Actions */
+.message-actions-menu {
+    position: absolute;
+    background: var(--chat-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 5px;
+    display: flex;
+    gap: 5px;
+    z-index: 100;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    top: -40px; /* Show above message */
+    right: 0;
+}
+
+.message.received .message-actions-menu {
+    right: auto;
+    left: 0;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.action-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-color);
+}
+
+.action-btn.delete:hover {
+    color: var(--danger-color);
+}
+
+/* Reply Context (Inside Message) */
+.reply-context {
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 3px solid rgba(255, 255, 255, 0.5);
+    padding: 5px 10px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    opacity: 0.8;
+}
+
+.reply-context strong {
+    display: block;
+    font-weight: 600;
+}
+
+/* Reply Preview (Input Area) */
+.reply-preview-bar {
+    background: var(--border-color);
+    padding: 10px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 3px solid var(--primary-color);
+    margin-bottom: 1px; /* Separation from input */
+}
+
+.reply-preview-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.reply-preview-title {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.reply-preview-text {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Reactions */
+.message-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.reaction-pill {
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    border: 1px solid transparent;
+    user-select: none;
+}
+
+.reaction-pill.active {
+    background: rgba(114, 137, 218, 0.3);
+    border-color: var(--primary-color);
+}
+
+.edited-tag {
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.6);
+    margin-left: 5px;
+    font-style: italic;
+}
+
+/* Emoji Picker (Simple) */
+.emoji-picker-container {
+    display: flex;
+    gap: 5px;
+    padding: 5px;
+    background: var(--chat-bg);
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.emoji-option {
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 2px;
+    transition: transform 0.1s;
+}
+
+.emoji-option:hover {
+    transform: scale(1.2);
+}
+
 
 .message.received {
     align-self: flex-start;
@@ -490,4 +646,155 @@ textarea:focus {
     .message {
         max-width: 85%;
     }
+}
+
+/* Minimized Mode / Floating Button */
+#floating-chat-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 70px;
+    height: 70px;
+    background: var(--chat-bg);
+    border-radius: 50%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 2px solid var(--primary-color);
+}
+
+#floating-chat-btn:hover {
+    transform: scale(1.1);
+}
+
+#floating-chat-btn .avatar-small {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+    position: relative;
+}
+
+#floating-chat-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #b9bbbe; /* Default offline */
+    border: 2px solid var(--chat-bg);
+}
+
+.status-dot.online {
+    background-color: #43b581;
+}
+
+#minimize-chat-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-right: 10px;
+    margin-bottom: 5px; /* Alignment fix */
+    transition: color 0.2s;
+}
+
+#minimize-chat-btn:hover {
+    color: var(--text-color);
+}
+
+/* Image Paste Preview Modal */
+.image-preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 4000;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.image-preview-content {
+    background: var(--chat-bg);
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 90%;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    border: 1px solid var(--border-color);
+}
+
+.image-preview-content h3 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.image-preview-content img {
+    max-width: 100%;
+    max-height: 60vh;
+    border-radius: 10px;
+    object-fit: contain;
+    background: #000;
+}
+
+.preview-actions {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.preview-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: transform 0.1s, opacity 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.preview-btn.cancel {
+    background: #4f545c;
+    color: white;
+}
+
+.preview-btn.send {
+    background: var(--primary-color);
+    color: white;
+}
+
+.preview-btn:hover {
+    transform: scale(1.05);
+    opacity: 0.9;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
