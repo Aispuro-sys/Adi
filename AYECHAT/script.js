@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function createDefaultUser(userId) {
         const defaultData = {
             name: userId === 'eduardo' ? 'Eduardo' : 'Adilene',
-            password: DEFAULT_PASSWORD,
+            password: DEFAULT_PASSWORDS[userId] || "123456",
             avatar: `https://ui-avatars.com/api/?name=${userId}&background=random`,
             chatBackground: '',
             online: false,
