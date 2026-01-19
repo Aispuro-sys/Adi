@@ -74,10 +74,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZATION ---
     
     async function init() {
+        // Load avatars for login screen immediately
+        loadLoginAvatars();
+
         // Check if cached login exists
         const cachedUserId = localStorage.getItem(LOGIN_KEY);
         if (cachedUserId) {
             await loadUserAndStart(cachedUserId);
+        }
+    }
+
+    async function loadLoginAvatars() {
+        try {
+            const users = ['eduardo', 'adilene'];
+            for (const userId of users) {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (userData.avatar) {
+                        const imgEl = document.getElementById(`img-login-${userId}`);
+                        if (imgEl) imgEl.src = userData.avatar;
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Error loading login avatars:", e);
         }
     }
 
@@ -221,6 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
         
         chatApp.classList.add('hidden');
         loginScreen.classList.remove('hidden');
+        
+        // Refresh avatars on login screen
+        loadLoginAvatars();
         
         // Reset Login UI
         selectedLoginUser = null;
@@ -568,18 +592,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    // Determine supported mime type
+                    let mimeType = 'audio/webm';
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        mimeType = 'audio/mp4';
+                    }
+                    
+                    console.log("Using mimeType:", mimeType);
+                    mediaRecorder = new MediaRecorder(stream, { mimeType });
                     audioChunks = [];
 
                     mediaRecorder.ondataavailable = (e) => {
-                        audioChunks.push(e.data);
+                        if (e.data.size > 0) {
+                            audioChunks.push(e.data);
+                        }
                     };
 
                     mediaRecorder.onstop = async () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        // Use the same mime type for the blob
+                        const audioBlob = new Blob(audioChunks, { type: mimeType.split(';')[0] });
                         // Validate blob size
                         if (audioBlob.size > 0) {
-                            const audioFile = new File([audioBlob], "voice_note.webm", { type: "audio/webm" });
+                            // Extension depends on mime type
+                            const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+                            const audioFile = new File([audioBlob], `voice_note.${ext}`, { type: mimeType.split(';')[0] });
                             
                             recordBtn.classList.remove('recording');
                             const originalIcon = recordBtn.innerHTML;
