@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Adi — Melodía</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0b1026;
+            --bg-gradient: linear-gradient(135deg, #0b1026 0%, #16213e 50%, #1a1a2e 100%);
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text-main: rgba(255, 255, 255, 0.95);
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --accent-pink: #ffd700;
+            --accent-glow: #8ae6ff;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-dark);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Nav Bar from other pages */
+        .nav-bar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            padding: 12px 24px;
+            background: rgba(20, 20, 30, 0.6);
+            backdrop-filter: blur(16px);
+            border-radius: 50px;
+            border: 1px solid var(--glass-border);
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 18px;
+            border-radius: 20px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
+        }
+
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .music-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(to right, #fff, #ffe0ef);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.artist {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        .vinyl-container {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 2.5rem;
+            position: relative;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .vinyl {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #111;
+            background-image: 
+                radial-gradient(circle at center, #222 40%, transparent 41%),
+                repeating-radial-gradient(#222 0, #222 2px, #111 3px, #111 4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: spin 10s linear infinite;
+            animation-play-state: paused;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .vinyl::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.1) 50%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        .vinyl-cover {
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background: url('https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80');
+            background-size: cover;
+            background-position: center;
+            border: 4px solid #fff;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        button.play-btn {
+            background: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 65px;
+            height: 65px;
+            color: #0b1026;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button.play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background: rgba(255,255,255,0.1);
+            height: 4px;
+            border-radius: 2px;
+            margin: 0 0 1.5rem;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            width: 0%;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            transition: width 0.1s linear;
+        }
+
+        .time-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+
+        /* Ambient Background */
+        .ambient-light {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+        }
+
+        .orb-1 { width: 400px; height: 400px; background: #4a1c40; top: 10%; left: 20%; animation: float 15s infinite ease-in-out; }
+        .orb-2 { width: 300px; height: 300px; background: #1c2e4a; bottom: 10%; right: 20%; animation: float 12s infinite ease-in-out reverse; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(30px, -30px); }
+        }
+
+        /* Particles */
+        .particles {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: rise var(--duration) linear infinite;
+        }
+
+        @keyframes rise {
+            0% { transform: translateY(110vh); opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-10vh); opacity: 0; }
+        }
+
+        @media (max-width: 600px) {
+            .nav-bar { width: 90%; padding: 10px; }
+            .nav-link { padding: 6px 12px; font-size: 0.8rem; }
+            .music-card { padding: 2rem; width: 85%; }
+            .vinyl-container { width: 180px; height: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="nav-bar">
+        <a href="index.html" class="nav-link">Inicio</a>
+        <a href="AYECHAT/index.html" class="nav-link">Chat Privado</a>
+        <a href="index2.html" class="nav-link">Playlist</a>
+        <a href="index3.html" class="nav-link">Flores</a>
+        <a href="index4.html" class="nav-link">Momentos</a>
+        <a href="index5.html" class="nav-link">San Valentín</a>
+        <a href="#" class="nav-link active">Melodía</a>
+    </div>
+
+    <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="particles" id="particles"></div>
+
+    <div class="main-container">
+        <div class="music-card">
+            <h1>Emmanuel Cortes</h1>
+            <p class="artist">Amor</p>
+
+            <div class="vinyl-container">
+                <div class="vinyl" id="vinyl">
+                    <div class="vinyl-cover"></div>
+                </div>
+            </div>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="time-display">
+                <span id="currTime">0:00</span>
+                <span id="durTime">0:00</span>
+            </div>
+
+            <div class="controls">
+                <button class="play-btn" id="playBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio" src="Musica/Emmanuell Cortess - Amor (LetraLyrics).mp3"></audio>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('playBtn');
+        const vinyl = document.getElementById('vinyl');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const currTime = document.getElementById('currTime');
+        const durTime = document.getElementById('durTime');
+        const particlesContainer = document.getElementById('particles');
+
+        // Play/Pause
+        playBtn.addEventListener('click', () => {
+            const isPlaying = playBtn.classList.contains('playing');
+            if (isPlaying) {
+                pauseSong();
+            } else {
+                playSong();
+            }
+        });
+
+        function playSong() {
+            playBtn.classList.add('playing');
+            playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+            vinyl.style.animationPlayState = 'running';
+            audio.play();
+        }
+
+        function pauseSong() {
+            playBtn.classList.remove('playing');
+            playBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+            vinyl.style.animationPlayState = 'paused';
+            audio.pause();
+        }
+
+        // Progress Bar
+        function updateProgress(e) {
+            const { duration, currentTime } = e.srcElement;
+            const progressPercent = (currentTime / duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+
+            let min = Math.floor(currentTime / 60);
+            let sec = Math.floor(currentTime % 60);
+            if (sec < 10) sec = `0${sec}`;
+            currTime.innerText = `${min}:${sec}`;
+
+            if (!isNaN(duration)) {
+                let minD = Math.floor(duration / 60);
+                let secD = Math.floor(duration % 60);
+                if (secD < 10) secD = `0${secD}`;
+                durTime.innerText = `${minD}:${secD}`;
+            }
+        }
+
+        function setProgress(e) {
+            const width = this.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            audio.currentTime = (clickX / width) * duration;
+        }
+
+        audio.addEventListener('timeupdate', updateProgress);
+        progressContainer.addEventListener('click', setProgress);
+        audio.addEventListener('ended', pauseSong);
+
+        // Particle System
+        function createParticles() {
+            const count = 30;
+            for(let i=0; i<count; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.style.left = Math.random() * 100 + 'vw';
+                const size = Math.random() * 3 + 1;
+                p.style.width = size + 'px';
+                p.style.height = size + 'px';
+                p.style.setProperty('--duration', (Math.random() * 10 + 10) + 's');
+                p.style.animationDelay = (Math.random() * -20) + 's';
+                particlesContainer.appendChild(p);
+            }
+        }
+        createParticles();
+    </script>
+</body>
+</html>
