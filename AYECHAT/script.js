@@ -626,24 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (msg.type === 'image') {
-            if (msg.viewOnce) {
-                // View-once image
-                const isViewed = msg.viewedBy && msg.viewedBy.includes(currentUser.id);
-                const isSender = msg.senderId === currentUser.id;
-                
-                if (isViewed && !isSender) {
-                    contentHtml += `<div class="view-once-expired"><i class="fas fa-eye-slash"></i> Imagen vista</div>`;
-                } else if (isSender && msg.viewedBy && msg.viewedBy.length > 0) {
-                    contentHtml += `<div class="view-once-opened"><i class="fas fa-eye"></i> Abierta</div>`;
-                } else {
-                    contentHtml += `<div class="view-once-image" onclick="window.viewOnceImage('${id}', '${msg.content}')">
-                        <i class="fas fa-eye"></i>
-                        <p>Ver una vez</p>
-                    </div>`;
-                }
-            } else {
-                contentHtml += `<img src="${msg.content}" alt="Image" onclick="window.open(this.src)">`;
-            }
+            contentHtml += `<img src="${msg.content}" alt="Image" onclick="window.open(this.src)">`;
         }
         
         if (msg.type === 'audio') {
@@ -855,7 +838,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function sendMessage(content, type = 'text', fileName = null, viewOnce = false) {
+    async function sendMessage(content, type = 'text', fileName = null) {
         if (!currentUser) return;
 
         try {
@@ -882,9 +865,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 senderName: currentUser.name,
                 senderAvatar: currentUser.avatar,
                 read: false,
-                deletedFor: [], // Init array
-                viewOnce: viewOnce, // View once flag
-                viewedBy: [] // Track who has viewed it
+                deletedFor: [] // Init array
             };
 
             // REPLY DATA
@@ -904,107 +885,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function scrollToBottom() {
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
-
-    // --- VIEW ONCE IMAGE FUNCTIONS ---
-
-    function askViewOnce() {
-        return new Promise((resolve) => {
-            const modal = document.createElement('div');
-            modal.className = 'view-once-modal';
-            modal.innerHTML = `
-                <div class="view-once-modal-content">
-                    <h3>¿Enviar como imagen de una sola vista?</h3>
-                    <p>La imagen se eliminará después de ser vista</p>
-                    <div class="view-once-buttons">
-                        <button class="view-once-btn no-btn">No</button>
-                        <button class="view-once-btn yes-btn">Sí</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            modal.querySelector('.no-btn').addEventListener('click', () => {
-                modal.remove();
-                resolve(false);
-            });
-            
-            modal.querySelector('.yes-btn').addEventListener('click', () => {
-                modal.remove();
-                resolve(true);
-            });
-        });
-    }
-
-    window.viewOnceImage = async (msgId, imageUrl) => {
-        if (!currentUser) return;
-        
-        // Mark as viewed in Firestore
-        const msgRef = doc(db, "messages", msgId);
-        const msgDoc = await getDoc(msgRef);
-        if (!msgDoc.exists()) return;
-        
-        const data = msgDoc.data();
-        const viewedBy = data.viewedBy || [];
-        
-        if (!viewedBy.includes(currentUser.id)) {
-            viewedBy.push(currentUser.id);
-            await updateDoc(msgRef, { viewedBy });
-        }
-        
-        // Show image in full screen with screenshot prevention
-        const viewer = document.createElement('div');
-        viewer.className = 'view-once-viewer';
-        viewer.innerHTML = `
-            <div class="view-once-viewer-content">
-                <button class="close-viewer">&times;</button>
-                <img src="${imageUrl}" alt="View Once Image">
-                <p class="view-once-warning"><i class="fas fa-exclamation-triangle"></i> Esta imagen se verá solo una vez</p>
-            </div>
-        `;
-        
-        // Prevent screenshot attempts (limited effectiveness but adds deterrent)
-        viewer.style.userSelect = 'none';
-        viewer.style.webkitUserSelect = 'none';
-        viewer.style.pointerEvents = 'auto';
-        
-        document.body.appendChild(viewer);
-        
-        // Prevent right-click, long-press, and keyboard shortcuts
-        const preventActions = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        };
-        
-        viewer.addEventListener('contextmenu', preventActions);
-        viewer.addEventListener('touchstart', preventActions);
-        viewer.addEventListener('touchend', preventActions);
-        
-        // Close viewer
-        const closeViewer = () => {
-            viewer.remove();
-            document.removeEventListener('keydown', keyHandler);
-        };
-        
-        viewer.querySelector('.close-viewer').addEventListener('click', closeViewer);
-        viewer.addEventListener('click', (e) => {
-            if (e.target === viewer) closeViewer();
-        });
-        
-        // Prevent print screen and screenshot shortcuts
-        const keyHandler = (e) => {
-            if (e.key === 'PrintScreen' || 
-                (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) || // Mac screenshots
-                (e.ctrlKey && e.key === 'p') || // Print
-                e.key === 'F12') { // DevTools
-                e.preventDefault();
-                return false;
-            }
-        };
-        
-        document.addEventListener('keydown', keyHandler);
-    };
 
     // --- FILE UPLOAD HELPER (CLOUDINARY) ---
 
@@ -1178,9 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (url) {
                     if (file.type.startsWith('image/')) {
-                        // Ask if image should be view-once
-                        const viewOnce = await askViewOnce();
-                        sendMessage(url, 'image', null, viewOnce);
+                        sendMessage(url, 'image');
                     } else {
                         sendMessage(url, 'file', file.name);
                     }
