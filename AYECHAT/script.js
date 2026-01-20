@@ -20,6 +20,8 @@ const CLOUDINARY_CLOUD_NAME = 'dmawscx9h';
 const CLOUDINARY_UPLOAD_PRESET = 'AYECHAT';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("AYECHAT Script v3.0 Loaded - Fixes applied");
+    
     // Constants
     const DEFAULT_PASSWORDS = {
         'eduardo': "16402080077290",
@@ -82,6 +84,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let typingTimeout = null;
     let replyingTo = null; // { id, name, text }
     let editingMessageId = null; // ID of message being edited
+
+    // --- HELPER FUNCTIONS ---
+    
+    function setAvatar(imgElement, url, name) {
+        if (!imgElement) return;
+        const fallback = `https://ui-avatars.com/api/?name=${name}&background=random`;
+        
+        imgElement.onerror = () => {
+            imgElement.src = fallback;
+        };
+        
+        imgElement.src = url || fallback;
+    }
 
     // --- INITIALIZATION ---
     
@@ -149,7 +164,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ... (loadLoginAvatars remains same)
+    async function loadLoginAvatars() {
+        const users = ['eduardo', 'adilene'];
+        for (const userId of users) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                const img = document.getElementById(`img-login-${userId}`);
+                if (userDoc.exists() && img) {
+                    const data = userDoc.data();
+                    setAvatar(img, data.avatar, userId);
+                }
+            } catch (e) {
+                console.warn(`Could not load avatar for ${userId}`, e);
+            }
+        }
+    }
 
     async function updateOnlineStatus(isOnline) {
         if (!currentUser) return;
@@ -340,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Update Header UI with Partner Info
                 currentUserName.textContent = partnerData.name;
-                currentUserAvatar.src = partnerData.avatar || `https://ui-avatars.com/api/?name=${partnerId}`;
+                setAvatar(currentUserAvatar, partnerData.avatar, partnerId);
                 
                 const statusEl = document.querySelector('.status');
                 
@@ -379,7 +408,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ... (applyChatBackground remains same) ...
     function applyChatBackground() {
         if (currentUser && currentUser.chatBackground) {
             chatWindow.style.backgroundImage = `url('${currentUser.chatBackground}')`;
@@ -439,14 +467,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function maximizeChat() {
-        floatingBtn.classList.add('hidden');
+        if (floatingBtn) floatingBtn.classList.add('hidden');
         chatApp.classList.remove('hidden');
         scrollToBottom();
     }
 
-    minimizeBtn.addEventListener('click', minimizeChat);
+    if (minimizeBtn) minimizeBtn.addEventListener('click', minimizeChat);
     
-    floatingBtn.addEventListener('click', maximizeChat);
+    if (floatingBtn) floatingBtn.addEventListener('click', maximizeChat);
 
     // ESC to minimize
     document.addEventListener('keydown', (e) => {
