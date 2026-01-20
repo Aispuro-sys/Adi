@@ -85,6 +85,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let replyingTo = null; // { id, name, text }
     let editingMessageId = null; // ID of message being edited
 
+    // --- HELPER FUNCTIONS ---
+    
+    function setAvatar(imgElement, url, name) {
+        if (!imgElement) return;
+        const fallback = `https://ui-avatars.com/api/?name=${name}&background=random`;
+        
+        imgElement.onerror = () => {
+            imgElement.src = fallback;
+        };
+        
+        imgElement.src = url || fallback;
+    }
+
     // --- INITIALIZATION ---
     
     async function init() {
@@ -159,9 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const img = document.getElementById(`img-login-${userId}`);
                 if (userDoc.exists() && img) {
                     const data = userDoc.data();
-                    if (data.avatar) {
-                        img.src = data.avatar;
-                    }
+                    setAvatar(img, data.avatar, userId);
                 }
             } catch (e) {
                 console.warn(`Could not load avatar for ${userId}`, e);
