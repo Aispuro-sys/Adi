@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Update Header UI with Partner Info
                 currentUserName.textContent = partnerData.name;
-                currentUserAvatar.src = partnerData.avatar || `https://ui-avatars.com/api/?name=${partnerId}`;
+                setAvatar(currentUserAvatar, partnerData.avatar, partnerId);
                 
                 const statusEl = document.querySelector('.status');
                 
