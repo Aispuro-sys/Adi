@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function performLogin() {
         if (!selectedLoginUser) return;
         
-        const pwd = passwordInput.value;
+        const pwd = passwordInput.value.trim();
         if (!pwd) return;
 
         loginBtn.textContent = '...';
@@ -380,6 +380,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ... (applyChatBackground remains same) ...
+    function applyChatBackground() {
+        if (currentUser && currentUser.chatBackground) {
+            chatWindow.style.backgroundImage = `url('${currentUser.chatBackground}')`;
+            chatWindow.style.backgroundSize = 'cover';
+            chatWindow.style.backgroundPosition = 'center';
+        } else {
+            chatWindow.style.backgroundImage = 'none';
+        }
+    }
 
     function logout() {
         if (currentUser) {
