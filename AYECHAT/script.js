@@ -69,14 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPassword = document.getElementById('settings-password');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
 
-    // Notification via vibration (no audio to avoid pausing music)
-    function triggerNotification() {
-        // Vibrate on mobile devices
-        if ('vibrate' in navigator) {
-            navigator.vibrate([200, 100, 200]); // Pattern: vibrate-pause-vibrate
-        }
-    }
-
     // State
     let currentUser = null; // { id, name, avatar, password, chatBackground }
     let selectedLoginUser = null;
@@ -89,8 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let typingTimeout = null;
     let replyingTo = null; // { id, name, text }
     let editingMessageId = null; // ID of message being edited
+    let unreadCount = 0; // Unread message counter
 
     // --- HELPER FUNCTIONS ---
+    
+    function updateTitleWithUnread() {
+        if (unreadCount > 0) {
+            document.title = `(${unreadCount}) Chat Privado`;
+        } else {
+            document.title = 'Chat Privado';
+        }
+    }
     
     function setAvatar(imgElement, url, name) {
         if (!imgElement) return;
@@ -174,6 +175,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentUser) {
                 updateOnlineStatus(document.visibilityState === 'visible');
                 if (document.visibilityState === 'visible') {
+                    // Reset unread counter when user returns to chat
+                    unreadCount = 0;
+                    updateTitleWithUnread();
                     markUnreadMessagesAsRead();
                 }
             }
@@ -519,15 +523,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         const now = new Date();
                         const msgTime = msg.timestamp ? msg.timestamp.toDate() : new Date();
                         if ((now - msgTime) < 30000) { // Recent message
-                            // Vibration instead of sound (doesn't pause music)
-                            triggerNotification();
-                            
-                            // Push Notification
-                            if (document.visibilityState === 'hidden' && Notification.permission === "granted") {
-                                new Notification(`Mensaje de ${msg.senderName}`, {
-                                    body: msg.text || (msg.type === 'image' ? '📷 Imagen' : (msg.type === 'audio' ? '🎤 Audio' : '📎 Archivo')),
-                                    icon: msg.senderAvatar
-                                });
+                            // Update unread counter only if window is not visible
+                            if (document.visibilityState === 'hidden') {
+                                unreadCount++;
+                                updateTitleWithUnread();
                             }
                         }
                     }
@@ -627,7 +626,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (msg.type === 'image') {
-            contentHtml += `<img src="${msg.content}" alt="Image" onclick="window.open(this.src)">`;
+            if (msg.viewOnce) {
+                // View-once image
+                const isViewed = msg.viewedBy && msg.viewedBy.includes(currentUser.id);
+                const isSender = msg.senderId === currentUser.id;
+                
+                if (isViewed && !isSender) {
+                    contentHtml += `<div class="view-once-expired"><i class="fas fa-eye-slash"></i> Imagen vista</div>`;
+                } else if (isSender && msg.viewedBy && msg.viewedBy.length > 0) {
+                    contentHtml += `<div class="view-once-opened"><i class="fas fa-eye"></i> Abierta</div>`;
+                } else {
+                    contentHtml += `<div class="view-once-image" onclick="window.viewOnceImage('${id}', '${msg.content}')">
+                        <i class="fas fa-eye"></i>
+                        <p>Ver una vez</p>
+                    </div>`;
+                }
+            } else {
+                contentHtml += `<img src="${msg.content}" alt="Image" onclick="window.open(this.src)">`;
+            }
         }
         
         if (msg.type === 'audio') {
@@ -839,7 +855,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function sendMessage(content, type = 'text', fileName = null) {
+    async function sendMessage(content, type = 'text', fileName = null, viewOnce = false) {
         if (!currentUser) return;
 
         try {
@@ -866,7 +882,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 senderName: currentUser.name,
                 senderAvatar: currentUser.avatar,
                 read: false,
-                deletedFor: [] // Init array
+                deletedFor: [], // Init array
+                viewOnce: viewOnce, // View once flag
+                viewedBy: [] // Track who has viewed it
             };
 
             // REPLY DATA
@@ -886,6 +904,107 @@ document.addEventListener('DOMContentLoaded', () => {
     function scrollToBottom() {
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
+
+    // --- VIEW ONCE IMAGE FUNCTIONS ---
+
+    function askViewOnce() {
+        return new Promise((resolve) => {
+            const modal = document.createElement('div');
+            modal.className = 'view-once-modal';
+            modal.innerHTML = `
+                <div class="view-once-modal-content">
+                    <h3>¿Enviar como imagen de una sola vista?</h3>
+                    <p>La imagen se eliminará después de ser vista</p>
+                    <div class="view-once-buttons">
+                        <button class="view-once-btn no-btn">No</button>
+                        <button class="view-once-btn yes-btn">Sí</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            modal.querySelector('.no-btn').addEventListener('click', () => {
+                modal.remove();
+                resolve(false);
+            });
+            
+            modal.querySelector('.yes-btn').addEventListener('click', () => {
+                modal.remove();
+                resolve(true);
+            });
+        });
+    }
+
+    window.viewOnceImage = async (msgId, imageUrl) => {
+        if (!currentUser) return;
+        
+        // Mark as viewed in Firestore
+        const msgRef = doc(db, "messages", msgId);
+        const msgDoc = await getDoc(msgRef);
+        if (!msgDoc.exists()) return;
+        
+        const data = msgDoc.data();
+        const viewedBy = data.viewedBy || [];
+        
+        if (!viewedBy.includes(currentUser.id)) {
+            viewedBy.push(currentUser.id);
+            await updateDoc(msgRef, { viewedBy });
+        }
+        
+        // Show image in full screen with screenshot prevention
+        const viewer = document.createElement('div');
+        viewer.className = 'view-once-viewer';
+        viewer.innerHTML = `
+            <div class="view-once-viewer-content">
+                <button class="close-viewer">&times;</button>
+                <img src="${imageUrl}" alt="View Once Image">
+                <p class="view-once-warning"><i class="fas fa-exclamation-triangle"></i> Esta imagen se verá solo una vez</p>
+            </div>
+        `;
+        
+        // Prevent screenshot attempts (limited effectiveness but adds deterrent)
+        viewer.style.userSelect = 'none';
+        viewer.style.webkitUserSelect = 'none';
+        viewer.style.pointerEvents = 'auto';
+        
+        document.body.appendChild(viewer);
+        
+        // Prevent right-click, long-press, and keyboard shortcuts
+        const preventActions = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        };
+        
+        viewer.addEventListener('contextmenu', preventActions);
+        viewer.addEventListener('touchstart', preventActions);
+        viewer.addEventListener('touchend', preventActions);
+        
+        // Close viewer
+        const closeViewer = () => {
+            viewer.remove();
+            document.removeEventListener('keydown', keyHandler);
+        };
+        
+        viewer.querySelector('.close-viewer').addEventListener('click', closeViewer);
+        viewer.addEventListener('click', (e) => {
+            if (e.target === viewer) closeViewer();
+        });
+        
+        // Prevent print screen and screenshot shortcuts
+        const keyHandler = (e) => {
+            if (e.key === 'PrintScreen' || 
+                (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4' || e.key === '5')) || // Mac screenshots
+                (e.ctrlKey && e.key === 'p') || // Print
+                e.key === 'F12') { // DevTools
+                e.preventDefault();
+                return false;
+            }
+        };
+        
+        document.addEventListener('keydown', keyHandler);
+    };
 
     // --- FILE UPLOAD HELPER (CLOUDINARY) ---
 
@@ -1059,7 +1178,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (url) {
                     if (file.type.startsWith('image/')) {
-                        sendMessage(url, 'image');
+                        // Ask if image should be view-once
+                        const viewOnce = await askViewOnce();
+                        sendMessage(url, 'image', null, viewOnce);
                     } else {
                         sendMessage(url, 'file', file.name);
                     }
