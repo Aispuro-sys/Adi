@@ -379,7 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ... (applyChatBackground remains same) ...
     function applyChatBackground() {
         if (currentUser && currentUser.chatBackground) {
             chatWindow.style.backgroundImage = `url('${currentUser.chatBackground}')`;
@@ -439,14 +438,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function maximizeChat() {
-        floatingBtn.classList.add('hidden');
+        if (floatingBtn) floatingBtn.classList.add('hidden');
         chatApp.classList.remove('hidden');
         scrollToBottom();
     }
 
-    minimizeBtn.addEventListener('click', minimizeChat);
+    if (minimizeBtn) minimizeBtn.addEventListener('click', minimizeChat);
     
-    floatingBtn.addEventListener('click', maximizeChat);
+    if (floatingBtn) floatingBtn.addEventListener('click', maximizeChat);
 
     // ESC to minimize
     document.addEventListener('keydown', (e) => {
