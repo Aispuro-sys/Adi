@@ -149,7 +149,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ... (loadLoginAvatars remains same)
+    async function loadLoginAvatars() {
+        const users = ['eduardo', 'adilene'];
+        for (const userId of users) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                const img = document.getElementById(`img-login-${userId}`);
+                if (userDoc.exists() && img) {
+                    const data = userDoc.data();
+                    if (data.avatar) {
+                        img.src = data.avatar;
+                    }
+                }
+            } catch (e) {
+                console.warn(`Could not load avatar for ${userId}`, e);
+            }
+        }
+    }
 
     async function updateOnlineStatus(isOnline) {
         if (!currentUser) return;
