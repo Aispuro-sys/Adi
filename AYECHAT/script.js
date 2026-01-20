@@ -132,6 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('beforeunload', () => {
             if (currentUser) {
                 updateOnlineStatus(false); // Set offline on close
+                updateActivityStatus(null); // Clear typing/recording
+            }
+        });
+    }
+
     function setupReplyUI() {
         const inputArea = document.querySelector('.chat-input-area');
         const previewBar = document.createElement('div');
@@ -157,11 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         messageInput.value = '';
         messageInput.style.height = 'auto';
         sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-    }
-
-                updateActivityStatus(null); // Clear typing/recording
-            }
-        });
     }
 
     async function loadLoginAvatars() {
@@ -913,6 +913,89 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
+
+    // --- SETTINGS & LOGOUT HANDLERS ---
+
+    settingsBtn.addEventListener('click', () => {
+        if (!currentUser) return;
+        settingsModal.classList.remove('hidden');
+        settingsNickname.value = currentUser.name;
+        // Reset inputs
+        avatarInput.value = '';
+        bgInput.value = '';
+        settingsPassword.value = '';
+        if (currentUser.avatar) settingsAvatarPreview.src = currentUser.avatar;
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        if (confirm("¿Cerrar sesión?")) {
+            logout();
+        }
+    });
+
+    // Avatar Preview in Settings
+    avatarInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            settingsAvatarPreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    // Save Settings
+    saveSettingsBtn.addEventListener('click', async () => {
+        saveSettingsBtn.textContent = 'Guardando...';
+        saveSettingsBtn.disabled = true;
+
+        try {
+            const updates = {};
+            const nick = settingsNickname.value.trim();
+            const pwd = settingsPassword.value.trim();
+            
+            if (nick && nick !== currentUser.name) updates.name = nick;
+            if (pwd) updates.password = pwd;
+
+            // Upload Avatar if changed
+            if (avatarInput.files.length > 0) {
+                const url = await uploadFile(avatarInput.files[0], 'avatars');
+                if (url) updates.avatar = url;
+            }
+
+            // Upload Background if changed
+            if (bgInput.files.length > 0) {
+                const url = await uploadFile(bgInput.files[0], 'backgrounds');
+                if (url) updates.chatBackground = url;
+            }
+
+            if (Object.keys(updates).length > 0) {
+                await updateDoc(doc(db, "users", currentUser.id), updates);
+                // Local update will happen via onSnapshot
+                settingsModal.classList.add('hidden');
+                alert("Perfil actualizado correctamente.");
+            } else {
+                settingsModal.classList.add('hidden');
+            }
+
+        } catch (e) {
+            console.error("Error saving settings:", e);
+            alert("Error al guardar cambios.");
+        }
+        
+        saveSettingsBtn.textContent = 'Guardar Cambios';
+        saveSettingsBtn.disabled = false;
+    });
+
+    resetBgBtn.addEventListener('click', async () => {
+        if (confirm("¿Quitar fondo del chat?")) {
+            await updateDoc(doc(db, "users", currentUser.id), {
+                chatBackground: ''
+            });
+            alert("Fondo restablecido.");
+        }
+    });
 
     // --- EVENT LISTENERS (INPUTS) ---
 
