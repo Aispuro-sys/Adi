@@ -69,8 +69,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsPassword = document.getElementById('settings-password');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
 
-    // Notification Sound
-    const notificationSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); // Soft chime
+    // Notification via vibration (no audio to avoid pausing music)
+    function triggerNotification() {
+        // Vibrate on mobile devices
+        if ('vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]); // Pattern: vibrate-pause-vibrate
+        }
+    }
 
     // State
     let currentUser = null; // { id, name, avatar, password, chatBackground }
@@ -333,9 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // Start Listening to Messages
         subscribeToMessages();
         
-        // Try to play sound to request permission (silent)
-        notificationSound.play().catch(() => {});
-        
         // Request Notifications if not granted
         if ("Notification" in window && Notification.permission !== "granted") {
             Notification.requestPermission();
@@ -517,9 +519,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         const now = new Date();
                         const msgTime = msg.timestamp ? msg.timestamp.toDate() : new Date();
                         if ((now - msgTime) < 30000) { // Recent message
-                            // Sound
-                            notificationSound.currentTime = 0;
-                            notificationSound.play().catch(e => console.log("Audio autoplay prevented"));
+                            // Vibration instead of sound (doesn't pause music)
+                            triggerNotification();
                             
                             // Push Notification
                             if (document.visibilityState === 'hidden' && Notification.permission === "granted") {

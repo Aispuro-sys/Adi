@@ -645,6 +645,115 @@ textarea:focus {
     
     .message {
         max-width: 85%;
+        font-size: 0.9rem;
+    }
+    
+    /* Header adjustments */
+    .chat-header {
+        padding: 10px 12px;
+        flex-wrap: nowrap;
+    }
+    
+    .avatar {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .user-details h3 {
+        font-size: 0.95rem;
+    }
+    
+    .status {
+        font-size: 0.7rem;
+    }
+    
+    .actions button {
+        font-size: 1rem;
+        margin-left: 8px;
+    }
+    
+    /* Chat window */
+    .chat-window {
+        padding: 15px 10px;
+        gap: 12px;
+    }
+    
+    /* Input area improvements */
+    .chat-input-area {
+        padding: 10px;
+        flex-wrap: nowrap;
+    }
+    
+    #message-input {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+    
+    /* Reply Preview Bar - Mobile Optimized */
+    .reply-preview-bar {
+        padding: 8px 10px;
+        margin-bottom: 0;
+        border-left-width: 2px;
+    }
+    
+    .reply-preview-title {
+        font-size: 0.7rem;
+        margin-bottom: 1px;
+    }
+    
+    .reply-preview-text {
+        font-size: 0.8rem;
+        max-width: calc(100vw - 120px);
+    }
+    
+    #cancel-reply-btn {
+        padding: 4px;
+        font-size: 0.9rem;
+    }
+    
+    /* Context Menu - Better mobile positioning */
+    .message-actions-menu {
+        top: -45px;
+        padding: 4px;
+        gap: 3px;
+        font-size: 0.9rem;
+    }
+    
+    .emoji-picker-container {
+        gap: 3px;
+    }
+    
+    .emoji-option {
+        font-size: 1.1rem;
+        padding: 4px;
+    }
+    
+    .action-btn {
+        padding: 4px 6px;
+        font-size: 0.9rem;
+    }
+    
+    /* Modal adjustments */
+    .modal-content {
+        width: 95%;
+        padding: 1.5rem;
+    }
+    
+    /* Reactions */
+    .reaction-pill {
+        font-size: 0.75rem;
+        padding: 1px 5px;
+    }
+    
+    /* Message time and status */
+    .message-time {
+        font-size: 0.65rem;
+    }
+    
+    /* Reply context inside messages */
+    .reply-context {
+        font-size: 0.75rem;
+        padding: 4px 8px;
     }
 }
 
