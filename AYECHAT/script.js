@@ -20,6 +20,8 @@ const CLOUDINARY_CLOUD_NAME = 'dmawscx9h';
 const CLOUDINARY_UPLOAD_PRESET = 'AYECHAT';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("AYECHAT Script v3.0 Loaded - Fixes applied");
+    
     // Constants
     const DEFAULT_PASSWORDS = {
         'eduardo': "16402080077290",
