@@ -92,10 +92,56 @@ document.addEventListener('DOMContentLoaded', () => {
         const fallback = `https://ui-avatars.com/api/?name=${name}&background=random`;
         
         imgElement.onerror = () => {
+            imgElement.onerror = null; // Prevent infinite loop
             imgElement.src = fallback;
         };
         
         imgElement.src = url || fallback;
+    }
+
+    // --- UI SETUP & HELPERS ---
+
+    function setupReplyUI() {
+        const inputArea = document.querySelector('.chat-input-area');
+        const previewBar = document.createElement('div');
+        previewBar.id = 'reply-preview-bar';
+        previewBar.className = 'reply-preview-bar hidden';
+        previewBar.innerHTML = `
+            <div class="reply-preview-content">
+                <div class="reply-preview-title">Respondiendo a...</div>
+                <div class="reply-preview-text" id="reply-preview-text">...</div>
+            </div>
+            <button id="cancel-reply-btn" class="icon-btn"><i class="fas fa-times"></i></button>
+        `;
+        // Insert before the input container
+        inputArea.insertBefore(previewBar, inputArea.firstChild);
+        
+        document.getElementById('cancel-reply-btn').addEventListener('click', cancelReplyOrEdit);
+    }
+
+    function cancelReplyOrEdit() {
+        replyingTo = null;
+        editingMessageId = null;
+        document.getElementById('reply-preview-bar').classList.add('hidden');
+        messageInput.value = '';
+        messageInput.style.height = 'auto';
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+
+    async function loadLoginAvatars() {
+        const users = ['eduardo', 'adilene'];
+        for (const userId of users) {
+            try {
+                const userDoc = await getDoc(doc(db, "users", userId));
+                const img = document.getElementById(`img-login-${userId}`);
+                if (userDoc.exists() && img) {
+                    const data = userDoc.data();
+                    setAvatar(img, data.avatar, userId);
+                }
+            } catch (e) {
+                console.warn(`Could not load avatar for ${userId}`, e);
+            }
+        }
     }
 
     // --- INITIALIZATION ---
@@ -132,52 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('beforeunload', () => {
             if (currentUser) {
                 updateOnlineStatus(false); // Set offline on close
-    function setupReplyUI() {
-        const inputArea = document.querySelector('.chat-input-area');
-        const previewBar = document.createElement('div');
-        previewBar.id = 'reply-preview-bar';
-        previewBar.className = 'reply-preview-bar hidden';
-        previewBar.innerHTML = `
-            <div class="reply-preview-content">
-                <div class="reply-preview-title">Respondiendo a...</div>
-                <div class="reply-preview-text" id="reply-preview-text">...</div>
-            </div>
-            <button id="cancel-reply-btn" class="icon-btn"><i class="fas fa-times"></i></button>
-        `;
-        // Insert before the input container
-        inputArea.insertBefore(previewBar, inputArea.firstChild);
-        
-        document.getElementById('cancel-reply-btn').addEventListener('click', cancelReplyOrEdit);
-    }
-
-    function cancelReplyOrEdit() {
-        replyingTo = null;
-        editingMessageId = null;
-        document.getElementById('reply-preview-bar').classList.add('hidden');
-        messageInput.value = '';
-        messageInput.style.height = 'auto';
-        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
-    }
-
                 updateActivityStatus(null); // Clear typing/recording
             }
         });
-    }
-
-    async function loadLoginAvatars() {
-        const users = ['eduardo', 'adilene'];
-        for (const userId of users) {
-            try {
-                const userDoc = await getDoc(doc(db, "users", userId));
-                const img = document.getElementById(`img-login-${userId}`);
-                if (userDoc.exists() && img) {
-                    const data = userDoc.data();
-                    setAvatar(img, data.avatar, userId);
-                }
-            } catch (e) {
-                console.warn(`Could not load avatar for ${userId}`, e);
-            }
-        }
     }
 
     async function updateOnlineStatus(isOnline) {
@@ -764,6 +767,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Expose for global access (onclick handlers)
     window.toggleReaction = async (msgId, emoji) => {
+        if (!currentUser) return;
+        
         try {
             const msgRef = doc(db, "messages", msgId);
             const msgDoc = await getDoc(msgRef);
@@ -804,6 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function confirmDelete(msgId, isSender) {
+        if (!currentUser) return;
         if (!confirm("¿Eliminar mensaje?")) return;
 
         try {
@@ -913,6 +919,96 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
     }
+
+    // --- SETTINGS & LOGOUT HANDLERS ---
+
+    settingsBtn.addEventListener('click', () => {
+        if (!currentUser) return;
+        settingsModal.classList.remove('hidden');
+        settingsNickname.value = currentUser.name;
+        // Reset inputs
+        avatarInput.value = '';
+        bgInput.value = '';
+        settingsPassword.value = '';
+        
+        // Use setAvatar to handle potential broken links in currentUser.avatar
+        if (currentUser.avatar) {
+            setAvatar(settingsAvatarPreview, currentUser.avatar, currentUser.name);
+        } else {
+            // Force fallback if no avatar
+             setAvatar(settingsAvatarPreview, null, currentUser.name);
+        }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+        settingsModal.classList.add('hidden');
+    });
+
+    logoutBtn.addEventListener('click', () => {
+        if (confirm("¿Cerrar sesión?")) {
+            logout();
+        }
+    });
+
+    // Avatar Preview in Settings
+    avatarInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            settingsAvatarPreview.src = URL.createObjectURL(file);
+        }
+    });
+
+    // Save Settings
+    saveSettingsBtn.addEventListener('click', async () => {
+        saveSettingsBtn.textContent = 'Guardando...';
+        saveSettingsBtn.disabled = true;
+
+        try {
+            const updates = {};
+            const nick = settingsNickname.value.trim();
+            const pwd = settingsPassword.value.trim();
+            
+            if (nick && nick !== currentUser.name) updates.name = nick;
+            if (pwd) updates.password = pwd;
+
+            // Upload Avatar if changed
+            if (avatarInput.files.length > 0) {
+                const url = await uploadFile(avatarInput.files[0], 'avatars');
+                if (url) updates.avatar = url;
+            }
+
+            // Upload Background if changed
+            if (bgInput.files.length > 0) {
+                const url = await uploadFile(bgInput.files[0], 'backgrounds');
+                if (url) updates.chatBackground = url;
+            }
+
+            if (Object.keys(updates).length > 0) {
+                await updateDoc(doc(db, "users", currentUser.id), updates);
+                // Local update will happen via onSnapshot
+                settingsModal.classList.add('hidden');
+                alert("Perfil actualizado correctamente.");
+            } else {
+                settingsModal.classList.add('hidden');
+            }
+
+        } catch (e) {
+            console.error("Error saving settings:", e);
+            alert("Error al guardar cambios.");
+        }
+        
+        saveSettingsBtn.textContent = 'Guardar Cambios';
+        saveSettingsBtn.disabled = false;
+    });
+
+    resetBgBtn.addEventListener('click', async () => {
+        if (confirm("¿Quitar fondo del chat?")) {
+            await updateDoc(doc(db, "users", currentUser.id), {
+                chatBackground: ''
+            });
+            alert("Fondo restablecido.");
+        }
+    });
 
     // --- EVENT LISTENERS (INPUTS) ---
 
