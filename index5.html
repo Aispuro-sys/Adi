@@ -31,7 +31,108 @@
       overflow-x: hidden;
     }
 
-    /* --- LOCK SCREEN & COUNTDOWN --- */
+    /* --- MODE TOGGLE --- */
+    .mode-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2000;
+      background: rgba(20, 10, 15, 0.6);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 50px;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.5s ease;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+    }
+    .mode-toggle:hover { transform: scale(1.05); }
+    .mode-icon { font-size: 1.5rem; transition: transform 0.5s; }
+    .mode-text { font-size: 0.9rem; font-weight: 600; color: #fff; text-transform: uppercase; letter-spacing: 1px; }
+    
+    body.fire-mode {
+      --accent-pink: #ff2a2a;
+      --bg-gradient: linear-gradient(135deg, #1a0000 0%, #000 100%);
+    }
+    body.fire-mode .mode-toggle {
+      background: rgba(50, 0, 0, 0.8);
+      border-color: #ff2a2a;
+      box-shadow: 0 0 20px rgba(255, 42, 42, 0.4);
+    }
+
+    /* --- VIDEO MODAL --- */
+    .video-modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 7000;
+      display: none; justify-content: center; align-items: center; flex-direction: column;
+    }
+    .video-modal.show { display: flex; }
+    .video-container {
+      width: 90%; max-width: 800px; aspect-ratio: 9/16; max-height: 80vh;
+      background: #000; border-radius: 20px; overflow: hidden;
+      box-shadow: 0 0 50px rgba(255, 77, 109, 0.6), 0 0 100px rgba(255, 77, 109, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+    .video-container::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 22px;
+      background: linear-gradient(45deg, #ff4d6d, #ffccd5, #ffd700, #ff4d6d);
+      z-index: -1;
+      filter: blur(10px);
+      opacity: 0.7;
+    }
+    video { width: 100%; height: 100%; object-fit: contain; }
+
+    .btn-close-video {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 7001;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 500;
+    }
+    .btn-close-video:hover {
+      background: var(--accent-pink);
+      border-color: var(--accent-pink);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 10px 25px rgba(255, 77, 109, 0.4);
+    }
+    
+    .video-caption {
+      margin-top: 30px;
+      color: rgba(255, 255, 255, 0.95);
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      max-width: 80%;
+      line-height: 1.5;
+      animation: fadeInLock 1s ease-out 0.5s both;
+    }
+
+    /* Hidden content for modes */
+    .content-hidden { display: none; }
+
     #lockScreen {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -266,10 +367,10 @@
     .letter-view.active { opacity: 1; pointer-events: auto; }
     
     .letter-paper {
-      width: 90%; max-width: 600px;
-      height: 85vh; /* Fixed height */
+      width: 95%; max-width: 750px; /* Increased from 600px */
+      height: 90vh; /* Increased from 85vh */
       background: #fffcf5;
-      padding: 50px;
+      padding: 60px; /* Increased padding */
       box-shadow: 0 20px 60px rgba(0,0,0,0.5);
       position: relative;
       transform: translateY(50px) scale(0.9);
@@ -278,7 +379,7 @@
       flex-direction: column;
       justify-content: space-between;
       overflow: hidden;
-      border-radius: 4px;
+      border-radius: 6px;
     }
     .letter-view.active .letter-paper { transform: translateY(0) scale(1); }
 
@@ -704,6 +805,12 @@
 </head>
 <body>
 
+  <!-- MODE TOGGLE -->
+  <div class="mode-toggle" onclick="toggleMode()">
+    <div class="mode-icon" id="modeIcon">💖</div>
+    <div class="mode-text" id="modeText">Romántico</div>
+  </div>
+
   <!-- LOCK SCREEN -->
   <div id="lockScreen">
     <div class="lock-card">
@@ -764,71 +871,21 @@
     <div class="book-section">
       <h2 style="font-family:'Playfair Display'; margin-bottom:30px; font-size:2.2rem; color:#fff;">Nuestra Lectura</h2>
       
-      <div class="book-cover" onclick="openBook()">
-        <div style="font-size: 3rem; margin-bottom: 10px;">👑</div>
-        <div class="book-title">El Principito</div>
-        <div class="book-author">Antoine de Saint-Exupéry</div>
+      <div class="book-cover" id="bookCoverDisplay" onclick="openBook()">
+        <div id="bookIcon" style="font-size: 3rem; margin-bottom: 10px;">👑</div>
+        <div class="book-title" id="bookTitle">El Principito</div>
+        <div class="book-author" id="bookAuthor">Antoine de Saint-Exupéry</div>
       </div>
 
-      <p style="margin-bottom:30px; color:rgba(255,255,255,0.8); max-width:600px; margin-left:auto; margin-right:auto; font-style:italic;">
+      <p id="bookDescription" style="margin-bottom:30px; color:rgba(255,255,255,0.8); max-width:600px; margin-left:auto; margin-right:auto; font-style:italic;">
         "Solo con el corazón se puede ver bien; lo esencial es invisible a los ojos."<br>
         Una historia para recordarnos la belleza de las cosas simples.
       </p>
       
-      <button class="read-btn" onclick="openBook()">📖 Leer el Libro</button>
-    </div>
-
-    <!-- PASSION CAROUSEL -->
-    <div class="carousel-section">
-      <button class="carousel-arrow" onclick="moveCarousel(-1)">&#8249;</button>
-      <div class="carousel-track-container">
-        <div class="carousel-track" id="passionTrack">
-          <!-- Cards -->
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te deseo sin control.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te pienso con mi piel ardiendo lento.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Mi deseo crece salvaje cuando tu ausencia pierde sentido.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Me estoy dejando llevar por el impulso que pronuncia tu nombre.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">No existen frenos cuando tu piel gobierna mis pensamientos.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Cada latido insiste terco, reclamando tu cercanía inmediata.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero tenerte ahora.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Sin defensas, sin retorno posible.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que nos consuma esta lujuria insaciable.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Incitar indecencia en tus pensamientos.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Yo quiero corromperte de formas muy perversas.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tus labios se mojen al mirarme.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero adueñarme de tu fuego.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Volverte adicta a mis provocaciones.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero que tus deseos contengan mi nombre.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero ser la tentación que no se puede evitar.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">El antojo salvaje de tu alma.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Las almas nacidas del fuego se atraen, no pueden evitarlo.</p></div>
-          
-          <!-- Duplicate for infinite scroll -->
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te deseo sin control.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Te pienso con mi piel ardiendo lento.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Mi deseo crece salvaje cuando tu ausencia pierde sentido.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Me estoy dejando llevar por el impulso que pronuncia tu nombre.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">No existen frenos cuando tu piel gobierna mis pensamientos.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Cada latido insiste terco, reclamando tu cercanía inmediata.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero tenerte ahora.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Sin defensas, sin retorno posible.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que nos consuma esta lujuria insaciable.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Incitar indecencia en tus pensamientos.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Yo quiero corromperte de formas muy perversas.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tu piel arda al tocarla.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Que tus labios se mojen al mirarme.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero adueñarme de tu fuego.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Volverte adicta a mis provocaciones.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero que tus deseos contengan mi nombre.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Quiero ser la tentación que no se puede evitar.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">El antojo salvaje de tu alma.</p></div>
-          <div class="passion-card"><div class="fire-glow"></div><p class="passion-text">Las almas nacidas del fuego se atraen, no pueden evitarlo.</p></div>
-        </div>
+      <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+        <button class="read-btn" onclick="openBook()">📖 Leer el Libro</button>
+        <button class="read-btn" style="background: linear-gradient(45deg, #a020f0, #ff00ff);" onclick="openVideo()">🎬 Ver Video Especial</button>
       </div>
-      <button class="carousel-arrow" onclick="moveCarousel(1)">&#8250;</button>
     </div>
 
   </div>
@@ -841,116 +898,349 @@
       </button>
       
       <div class="letter-content" id="letterContent">
-        <!-- Page 1 (Text) -->
-        <div class="letter-page active">
-            <h3 style="text-align:center; font-style:italic; margin-bottom:20px;">Mi querida Adi...</h3>
-            <p>
-              Hay sentimientos que nacen en el silencio más profundo y crecen con la fuerza de un incendio en la oscuridad. Eres, sin lugar a dudas, lo mejor que me ha pasado en la vida, el verso más bonito que el destino decidió escribir en mi historia.
-            </p>
-            <p>
-              Me preocupo por ti, y no es una obligación, es una necesidad vital. Porque al mirarte, me reencuentro a mí mismo; eres el espejo donde mi alma, por fin, se reconoce, se siente a salvo y comprende quién es realmente.
-            </p>
+        <!-- NORMAL CONTENT (ROMANTIC) -->
+        <div id="romanticContent">
+            <!-- Page 1 (Text) -->
+            <div class="letter-page active">
+                <h3 style="text-align:center; font-style:italic; margin-bottom:20px;">Mi querida Adi...</h3>
+                <p>
+                  Hay sentimientos que nacen en el silencio más profundo y crecen con la fuerza de un incendio en la oscuridad. Eres, sin lugar a dudas, lo mejor que me ha pasado en la vida, el verso más bonito que el destino decidió escribir en mi historia.
+                </p>
+                <p>
+                  Cada día que pasa, descubro un nuevo matiz en tu sonrisa que me hace volver a enamorarme. No es solo amor lo que siento, es una admiración profunda por la mujer en la que te has convertido y en la que sigues floreciendo.
+                </p>
+                <p>
+                  Me preocupo por ti, y no es una obligación, es una necesidad vital. Porque al mirarte, me reencuentro a mí mismo; eres el espejo donde mi alma, por fin, se reconoce, se siente a salvo y comprende quién es realmente.
+                </p>
+            </div>
+
+            <!-- Page 2 (Image) -->
+            <div class="letter-page centered">
+              <img src="Images/carta%201.jpg" alt="Carta 1" class="letter-img">
+            </div>
+
+            <!-- Page 3 (Text - Poema) -->
+            <div class="letter-page">
+              <p>
+                Te pienso incluso cuando intento no hacerlo, cuando el día pasa sin pronunciar tu nombre, pero en cada sombra, en cada pausa del viento, tu ausencia me lo recuerda. No me basta el tiempo contigo, ni las palabras que intercambiamos, ni las veces que me miraste como si supieras que estaba a punto de caer.
+              </p>
+              <p>
+                Adoro la forma en que tus ojos se iluminan cuando hablas de lo que te apasiona, y cómo tu risa tiene el poder de disipar cualquier nube en mi cielo. Son esos pequeños detalles los que construyen mi mundo entero alrededor de ti.
+              </p>
+              <p>
+                Siempre quiero más y ese más me asusta porque no puedo retenerte, que no hay amor suficiente cuando alguien no se siente en casa y aún así si tú quisieras yo sería abrigo, sería tierra firme para tus pasos que dudan, sería refugio en tus días más grises, pero no puedo suplicarte que te quedes si tu alma ya está de viaje.
+              </p>
+            </div>
+
+            <!-- Page 4 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%202.jpg" alt="Carta 2" class="letter-img">
+            </div>
+
+            <!-- Page EXTRA 1 (Text - Destino) -->
+            <div class="letter-page">
+              <p>
+                A veces me pregunto qué habría sido de mí si no te hubiera conocido. Probablemente seguiría caminando, pero sin rumbo, viendo el mundo en blanco y negro. Tú le pusiste color a mi existencia, le diste melodía a mis silencios y convertiste lo ordinario en extraordinario.
+              </p>
+              <p>
+                No creo en las casualidades cuando se trata de nosotros. El universo tuvo que conspirar, mover estrellas y alinear planetas solo para que nuestros caminos coincidieran en el momento exacto. Y bendito sea ese instante.
+              </p>
+            </div>
+
+            <!-- Page 5 (Text - Promesa) -->
+            <div class="letter-page">
+              <p>
+                Tengo la certeza, antigua y profunda, de que esto no empezó aquí, en este tiempo y espacio. Siento que en otra vida, bajo otro cielo quizás más estrellado, te hice una promesa inquebrantable: encontrarte. Y aunque el universo giró mil veces y los caminos se borraron, lo cumplí.
+              </p>
+              <p>
+                Te encontré. Y ahora que estás aquí, mi realidad se define por tu presencia. Eres el ancla que me sostiene en las tormentas y el viento que me impulsa a volar, todo a la vez. Mi alma te conocía mucho antes de que mis ojos te vieran.
+              </p>
+              <p>
+                A veces cierro los ojos e imagino un futuro donde no tengamos que despedirnos, donde cada mañana comience con tu mirada y cada noche termine con tu abrazo. Esa visión es mi motor, mi esperanza inquebrantable.
+              </p>
+            </div>
+            
+             <!-- Page 6 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%203.jpg" alt="Carta 3" class="letter-img">
+            </div>
+
+            <!-- Page EXTRA 3 (Text - Sueños) -->
+            <div class="letter-page">
+              <p>
+                Sueño con el día en que nuestros planes dejen de ser borradores en el aire para convertirse en nuestra rutina sagrada. Despertar y saber que no tengo que despedirme, que el "hasta luego" se convierte en un "hasta la noche".
+              </p>
+              <p>
+                Quiero construir un reino donde solo existan nuestras reglas, donde el amor sea la única ley y tu felicidad mi única bandera. Estamos poniendo los cimientos de algo indestructible, ladrillo a ladrillo, beso a beso.
+              </p>
+            </div>
+
+            <!-- Page 7 (Text - Fuego Prohibido) -->
+            <div class="letter-page">
+              <p>
+                Sé que lo nuestro habita en el terreno de lo prohibido, en ese espacio secreto y sagrado donde solo nosotros tenemos la llave. No llevamos título ante los ojos del mundo, ni etiquetas que los demás puedan leer, pero ante mi corazón, eres la dueña absoluta y soberana.
+              </p>
+              <p>
+                Y quiero que lo sepas con la fuerza de un juramento eterno: estoy dispuesto a caminar hacia el fuego por ti. Estoy dispuesto a quemarme si es necesario, solo por mantener viva esta llama que nos une en la clandestinidad.
+              </p>
+              <p>
+                No me importa el juicio del mundo ni las reglas escritas por otros. Lo que tú y yo compartimos trasciende cualquier norma; es una verdad que solo nuestros corazones entienden y validan con cada latido compartido.
+              </p>
+            </div>
+
+            <!-- Page 8 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%204.jpg" alt="Carta 4" class="letter-img">
+            </div>
+
+            <!-- Page 9 (Text - Secreto) -->
+            <div class="letter-page">
+              <p>
+                Si este amor es una hoguera, que nos abrase a los dos hasta no dejar rastro. No temo quemarme si es a tu lado; prefiero volverme cenizas en el calor de tu cercanía que vivir intacto y frío en la inmensidad de tu ausencia.
+              </p>
+              <p>
+                Que el fuego purifique nuestros miedos. Guardaré este secreto como el tesoro más valioso, amándote en la sombra, protegiéndote en la luz, dispuesto a todo, sin límites y sin final.
+              </p>
+              <p>
+                Prometo ser tu cómplice en cada aventura y tu refugio en cada tormenta. No habrá oscuridad que no podamos atravesar juntos, ni obstáculo que pueda con la fuerza de lo que hemos construido en silencio.
+              </p>
+            </div>
+
+            <!-- Page 10 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%205.jpg" alt="Carta 5" class="letter-img">
+            </div>
+
+            <!-- Page EXTRA 2 (Text - Detalles) -->
+            <div class="letter-page">
+              <p>
+                Amo tus imperfecciones tanto como tus virtudes, porque te hacen real, te hacen humana, te hacen tú. Amo cómo te muerdes el labio cuando dudas, cómo brilla tu mirada cuando te ríes a carcajadas, y esa paz que transmites cuando simplemente estás ahí, en silencio, a mi lado.
+              </p>
+              <p>
+                Quiero coleccionar momentos contigo como quien guarda tesoros invaluables. Un café por la mañana, un paseo bajo la lluvia, una charla hasta la madrugada... todo cuenta, todo suma, todo es magia si es contigo.
+              </p>
+            </div>
+
+            <!-- Page 11 (Text - Distancia) -->
+            <div class="letter-page">
+              <p>
+                A veces la geografía es cruel y la vida nos presenta caminos que no siempre se cruzan en lo físico tanto como mi corazón anhela desesperadamente. Me duele no poder abrazarte cuando el mundo te pesa, no poder secar tus lágrimas con mis propias manos.
+              </p>
+              <p>
+                Pero he aprendido una verdad universal: el alma no entiende de mapas, ni de kilómetros, ni de barreras. No es necesario que estemos en la misma habitación para que yo esté contigo. Cierra los ojos, respira y siénteme. Estoy ahí, sosteniéndote.
+              </p>
+              <p>
+                La distancia es solo una prueba para ver cuán lejos puede viajar el amor. Y el mío viaja hacia ti cada segundo, cruzando océanos y fronteras para susurrarte al oído que no estás sola, que nunca lo estarás mientras yo respire.
+              </p>
+            </div>
+
+            <!-- Page 12 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%206.jpg" alt="Carta 6" class="letter-img">
+            </div>
+
+            <!-- Page EXTRA 4 (Text - Equipo) -->
+            <div class="letter-page">
+              <p>
+                No somos perfectos, y no pretendo que lo seamos. Somos perfectamente imperfectos el uno para el otro. En tus grietas encuentro donde encajar mis piezas, y en mis sombras tú pones la luz necesaria.
+              </p>
+              <p>
+                Gracias por ser mi equipo, mi compañera de batallas y mi paz tras la guerra. No importa qué venga mañana, si te tengo a mi lado, ya he ganado. Eres mi victoria más dulce.
+              </p>
+            </div>
+            
+            <!-- Page 13 (Final) -->
+             <div class="letter-page">
+               <p>
+                 Si alguna vez tus ojos se llenan de lágrimas, que sea solo por la inmensa felicidad de saberte amada incondicionalmente. Por la certeza de que en este vasto mundo hay alguien que te ama al 100%, que daría todo por ti sin pedir nada a cambio.
+               </p>
+               <p>
+                 Recuerda siempre: eres mi principio y mi fin, mi caos y mi paz. Gracias por existir, por ser tú, y por permitirme ser parte de tu maravillosa existencia.
+               </p>
+               <br>
+               <p style="text-align:right; font-style:italic; font-size:0.9rem;">
+                 Tu admirador incondicional.
+               </p>
+            </div>
+
+            <!-- Page 14 (Image - Final) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%207.jpg" alt="Carta 7" class="letter-img">
+            </div>
         </div>
 
-        <!-- Page 2 (Image) -->
-        <div class="letter-page centered">
-          <img src="Images/carta%201.jpg" alt="Carta 1" class="letter-img">
+        <!-- FIRE CONTENT (SEXUAL) -->
+        <div id="fireContent" class="content-hidden">
+             <!-- Page 1 -->
+            <div class="letter-page active">
+                <h3 style="text-align:center; font-style:italic; margin-bottom:20px; color:#d00000;">Deseo Prohibido...</h3>
+                <p>
+                  Te deseo sin control. Te pienso con mi piel ardiendo lento cada vez que recuerdo tus labios. Mi deseo crece salvaje cuando tu ausencia pierde sentido y solo quiero devorarte.
+                </p>
+                <p>
+                  Me estoy dejando llevar por el impulso que pronuncia tu nombre en gemidos ahogados. No existen frenos cuando tu piel gobierna mis pensamientos.
+                </p>
+                <p>
+                  Cada poro de mi piel grita tu nombre, suplicando el roce de tus manos. Es una sed que no se sacia con agua, sino con el sabor de tus besos y el calor de tu cuerpo fundiéndose con el mío.
+                </p>
+            </div>
+
+             <!-- Page 2 (Image) -->
+            <div class="letter-page centered">
+              <img src="Images/carta%208.jpeg" alt="Carta Fuego 1" class="letter-img">
+            </div>
+
+             <!-- Page 3 -->
+            <div class="letter-page">
+               <p>
+                 Mis manos solo buscan recorrerte entera. Cada latido insiste terco, reclamando tu cercanía inmediata. Quiero tenerte ahora, sin defensas, sin retorno posible.
+               </p>
+               <p>
+                 Que nos consuma esta lujuria insaciable que nos quema por dentro. Que tu piel arda al tocarla, que tiembles con cada roce y que tus ojos me pidan más.
+               </p>
+               <p>
+                 Quiero explorar cada rincón de tu geografía, desde el arco de tu cuello hasta la curva de tu cintura, memorizando con mis labios cada secreto que tu piel guarda para mí.
+               </p>
+            </div>
+
+             <!-- Page 4 (Image) -->
+            <div class="letter-page centered">
+              <img src="Images/carta%209.jpeg" alt="Carta Fuego 2" class="letter-img">
+            </div>
+
+             <!-- Page EXTRA 1 (Text - Obsesión) -->
+            <div class="letter-page">
+              <p>
+                Esto no es solo deseo, es hambre. Un hambre voraz que me consume desde las entrañas. Me descubro pensando en ti en los momentos más inoportunos, imaginando tus manos sobre mí, tu respiración agitada contra mi cuello, el sabor de tu piel.
+              </p>
+              <p>
+                Me he vuelto un adicto a la idea de poseerte, de marcarte, de saber que en ese instante de éxtasis solo existo yo en tu universo. Eres mi obsesión más deliciosa y mi perdición más dulce.
+              </p>
+            </div>
+
+             <!-- Page 5 -->
+            <div class="letter-page">
+              <p>
+                Incitar indecencia en tus pensamientos más puros. Yo quiero corromperte de formas muy perversas, volverte adicta a mis provocaciones, a este juego donde ambos perdemos la razón.
+              </p>
+              <p>
+                Quiero que tus labios se mojen al mirarme. Quiero adueñarme de tu fuego y que seamos uno solo en la oscuridad.
+              </p>
+              <p>
+                Me obsesiona la idea de ser el causante de tus suspiros más profundos, de ser quien te lleve al límite de la cordura y te haga olvidar todo lo que no sea el placer del momento presente.
+              </p>
+            </div>
+            
+             <!-- Page 6 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%2010.jpeg" alt="Carta Fuego 3" class="letter-img">
+            </div>
+
+             <!-- Page EXTRA 3 (Text - Visual) -->
+            <div class="letter-page">
+              <p>
+                Me gusta verte, pero más me gusta imaginar todo lo que puedo hacerte cuando nadie mira. Eres un lienzo que quiero pintar con mis manos, recorrer con mi lengua y marcar con mis dientes.
+              </p>
+              <p>
+                Tu belleza no es solo para admirarla, es para consumirla. Quiero ser el dueño de tus secretos más oscuros y el arquitecto de tus gemidos más ruidosos.
+              </p>
+            </div>
+
+             <!-- Page 7 -->
+            <div class="letter-page">
+              <p>
+                Quiero que tus deseos contengan mi nombre. Quiero ser la tentación que no se puede evitar, el antojo salvaje de tu alma que no te deja dormir.
+              </p>
+              <p>
+                No me basta con besarte; quiero consumirte. Quiero que cada suspiro tuyo sea mío, que cada estremecimiento lleve mi firma.
+              </p>
+              <p>
+                Eres mía en esos instantes donde el mundo desaparece, y yo soy tuyo, completamente entregado a la vorágine de sensaciones que provocas en mí. No quiero ser solo un recuerdo, quiero ser una marca imborrable en tu piel.
+              </p>
+            </div>
+
+             <!-- Page 8 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%2011.jpeg" alt="Carta Fuego 4" class="letter-img">
+            </div>
+            
+             <!-- Page 9 -->
+            <div class="letter-page">
+              <p>
+                 Las almas nacidas del fuego se atraen, no pueden evitarlo. Y yo estoy dispuesto a quemarme entero si es dentro de ti.
+              </p>
+              <p>
+                 Me vuelve loco imaginarte, saber que existes y que, de alguna manera, también me piensas en ese tono prohibido.
+              </p>
+              <p>
+                La química entre nosotros es peligrosa, explosiva, y sin embargo, es el único lugar donde me siento verdaderamente vivo. Arder contigo es mi destino favorito.
+              </p>
+            </div>
+
+             <!-- Page 10 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%2012.jpeg" alt="Carta Fuego 5" class="letter-img">
+            </div>
+
+             <!-- Page EXTRA 2 (Text - Rendición) -->
+            <div class="letter-page">
+              <p>
+                Me rindo ante ti. No tengo defensas cuando se trata de tu cuerpo. Eres capaz de desarmarme con una sola mirada, de ponerme de rodillas con un solo gesto. Tienes un poder sobre mí que me asusta y me excita a partes iguales.
+              </p>
+              <p>
+                Quiero que uses ese poder. Quiero que me lleves al borde, que me hagas perder el control, que me enseñes nuevos límites para luego romperlos juntos. Haz conmigo lo que quieras, porque soy tuyo.
+              </p>
+            </div>
+
+             <!-- Page 11 -->
+            <div class="letter-page">
+               <p>
+                 Eres mi vicio favorito, mi pecado más dulce. No quiero redención si el castigo es seguir deseándote con esta fuerza animal.
+               </p>
+               <p>
+                 Ven y apaga este incendio, o mejor aún... échale más leña y dejemos que todo arda hasta los cimientos.
+               </p>
+               <p>
+                 No busco cura para esta adicción, al contrario, quiero dosis cada vez más altas de ti. Embriágame con tu esencia hasta que no sepa dónde termino yo y dónde empiezas tú.
+               </p>
+            </div>
+
+             <!-- Page 12 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%2013.jpeg" alt="Carta Fuego 6" class="letter-img">
+            </div>
+
+             <!-- Page EXTRA 4 (Text - Insaciable) -->
+            <div class="letter-page">
+              <p>
+                Podría pasarme la vida entera explorando tu cuerpo y aún así sentiría que me falta tiempo. Eres un laberinto de placer del que no quiero encontrar la salida.
+              </p>
+              <p>
+                Quédate conmigo en este caos delicioso. Dejemos que el instinto tome el control y olvidemos por un rato que somos civilizados. Esta noche, solo somos dos animales buscando saciarse.
+              </p>
+            </div>
+
+             <!-- Page 13 -->
+            <div class="letter-page">
+               <p>
+                 Te espero en mis sueños más húmedos y en mis realidades más ansiosas.
+               </p>
+               <p>
+                 Que esta fantasía se haga carne y que nuestros cuerpos escriban la historia que las palabras no alcanzan a describir. Te deseo con una intensidad que asusta y fascina a la vez.
+               </p>
+               <br>
+               <p style="text-align:right; font-style:italic; font-size:0.9rem; color:#d00000;">
+                 Tuyo en cuerpo y deseo,<br>
+                 Tu fuego eterno.
+               </p>
+            </div>
+
+             <!-- Page 14 (Image) -->
+            <div class="letter-page centered">
+               <img src="Images/carta%2014.jpeg" alt="Carta Fuego 7" class="letter-img">
+            </div>
         </div>
 
-        <!-- Page 3 (Text - Poema) -->
-        <div class="letter-page">
-          <p>
-            Te pienso incluso cuando intento no hacerlo, cuando el día pasa sin pronunciar tu nombre, pero en cada sombra, en cada pausa del viento, tu ausencia me lo recuerda. No me basta el tiempo contigo, ni las palabras que intercambiamos, ni las veces que me miraste como si supieras que estaba a punto de caer.
-          </p>
-          <p>
-            Siempre quiero más y ese más me asusta porque no puedo retenerte, que no hay amor suficiente cuando alguien no se siente en casa y aún así si tú quisieras yo sería abrigo, sería tierra firme para tus pasos que dudan, sería refugio en tus días más grises, pero no puedo suplicarte que te quedes si tu alma ya está de viaje.
-          </p>
-        </div>
-
-        <!-- Page 4 (Image) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%202.jpg" alt="Carta 2" class="letter-img">
-        </div>
-
-        <!-- Page 5 (Text - Promesa) -->
-        <div class="letter-page">
-          <p>
-            Tengo la certeza, antigua y profunda, de que esto no empezó aquí, en este tiempo y espacio. Siento que en otra vida, bajo otro cielo quizás más estrellado, te hice una promesa inquebrantable: encontrarte. Y aunque el universo giró mil veces y los caminos se borraron, lo cumplí.
-          </p>
-          <p>
-            Te encontré. Y ahora que estás aquí, mi realidad se define por tu presencia. Eres el ancla que me sostiene en las tormentas y el viento que me impulsa a volar, todo a la vez. Mi alma te conocía mucho antes de que mis ojos te vieran.
-          </p>
-        </div>
-
-        <!-- Page 6 (Image) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%203.jpg" alt="Carta 3" class="letter-img">
-        </div>
-
-        <!-- Page 7 (Text - Fuego Prohibido) -->
-        <div class="letter-page">
-          <p>
-            Sé que lo nuestro habita en el terreno de lo prohibido, en ese espacio secreto y sagrado donde solo nosotros tenemos la llave. No llevamos título ante los ojos del mundo, ni etiquetas que los demás puedan leer, pero ante mi corazón, eres la dueña absoluta y soberana.
-          </p>
-          <p>
-            Y quiero que lo sepas con la fuerza de un juramento eterno: estoy dispuesto a caminar hacia el fuego por ti. Estoy dispuesto a quemarme si es necesario, solo por mantener viva esta llama que nos une en la clandestinidad.
-          </p>
-        </div>
-
-        <!-- Page 8 (Image) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%204.jpg" alt="Carta 4" class="letter-img">
-        </div>
-
-        <!-- Page 9 (Text - Secreto) -->
-        <div class="letter-page">
-          <p>
-            Si este amor es una hoguera, que nos abrase a los dos hasta no dejar rastro. No temo quemarme si es a tu lado; prefiero volverme cenizas en el calor de tu cercanía que vivir intacto y frío en la inmensidad de tu ausencia.
-          </p>
-          <p>
-            Que el fuego purifique nuestros miedos. Guardaré este secreto como el tesoro más valioso, amándote en la sombra, protegiéndote en la luz, dispuesto a todo, sin límites y sin final.
-          </p>
-        </div>
-
-        <!-- Page 10 (Image) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%205.jpg" alt="Carta 5" class="letter-img">
-        </div>
-
-        <!-- Page 11 (Text - Distancia) -->
-        <div class="letter-page">
-          <p>
-            A veces la geografía es cruel y la vida nos presenta caminos que no siempre se cruzan en lo físico tanto como mi corazón anhela desesperadamente. Me duele no poder abrazarte cuando el mundo te pesa, no poder secar tus lágrimas con mis propias manos.
-          </p>
-          <p>
-            Pero he aprendido una verdad universal: el alma no entiende de mapas, ni de kilómetros, ni de barreras. No es necesario que estemos en la misma habitación para que yo esté contigo. Cierra los ojos, respira y siénteme. Estoy ahí, sosteniéndote.
-          </p>
-        </div>
-
-        <!-- Page 12 (Image) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%206.jpg" alt="Carta 6" class="letter-img">
-        </div>
-
-        <!-- Page 13 (Text - Cierre) -->
-        <div class="letter-page">
-           <p>
-             Si alguna vez tus ojos se llenan de lágrimas, que sea solo por la inmensa felicidad de saberte amada incondicionalmente. Por la certeza de que en este vasto mundo hay alguien que te ama al 100%, que daría todo por ti sin pedir nada a cambio.
-           </p>
-           <p>
-             Siempre estaré aquí. En cuerpo cuando el destino lo permita, y en espíritu siempre, eternamente.
-           </p>
-           <br>
-           <p style="text-align:right; font-style:italic; font-size:0.9rem;">
-             Con todo mi amor, mi alma, mi lealtad y mi secreto,<br>
-             Tu admirador incondicional, hoy y siempre.
-           </p>
-        </div>
-
-        <!-- Page 14 (Image - Final) -->
-        <div class="letter-page centered">
-           <img src="Images/carta%207.jpg" alt="Carta 7" class="letter-img">
-        </div>
       </div>
 
       <div class="letter-controls">
@@ -961,13 +1251,27 @@
     </div>
   </div>
 
+  <!-- VIDEO MODAL -->
+  <div id="videoModal" class="video-modal">
+    <button class="btn-close-video" onclick="closeVideo()">
+      <span style="font-size:1.2rem;">✕</span> Cerrar
+    </button>
+    <div class="video-container">
+      <video controls loop id="mainVideo">
+        <source src="Video/video_adi.mp4" type="video/mp4">
+        Tu navegador no soporta video.
+      </video>
+    </div>
+    <p class="video-caption">"Cada vez que te veo, suena música en mi corazón..." 🎶❤️</p>
+  </div>
+
   <!-- PDF VIEWER -->
   <div id="pdfModal" class="pdf-modal">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <a href="Libro/El_principito-Antoine_de_Saint-Exupery.pdf" target="_blank" class="close-letter" style="text-decoration:none; background:rgba(255,255,255,0.15);">📄 Abrir Externo</a>
+      <a id="pdfLink" href="Libro/El_principito-Antoine_de_Saint-Exupery.pdf" target="_blank" class="close-letter" style="text-decoration:none; background:rgba(255,255,255,0.15);">📄 Abrir Externo</a>
       <button class="close-letter" style="color:#fff; position:static;" onclick="closeBook()">Cerrar</button>
     </div>
-    <iframe class="pdf-frame" src="Libro/El_principito-Antoine_de_Saint-Exupery.pdf"></iframe>
+    <iframe id="pdfFrame" class="pdf-frame" src="Libro/El_principito-Antoine_de_Saint-Exupery.pdf"></iframe>
   </div>
 
   <!-- MUSIC WIDGET -->
@@ -982,70 +1286,8 @@
   <!-- LYRICS MODAL -->
   <div id="lyricsModal" class="lyrics-modal">
     <button class="modal-close-btn" onclick="closeLyrics()">✕ Cerrar</button>
-    <div class="lyrics-content">
-      <p>Me duele el pecho por nunca confesarte<br>
-      Por ser amargo, por no ser tan constante<br>
-      Por no decirte que te amo a cada instante</p>
-
-      <p>Hoy brindo por tenerte aquí<br>
-      Por verte sonreír por mí<br>
-      Por darme ganas de vivir<br>
-      Y por todo lo que aprendí</p>
-
-      <p>Yo te digo todo, no me quiero arrepentir<br>
-      Que el día que te vayas, que tengas que partir<br>
-      No sé qué va a ser de mí<br>
-      Dime, ¿qué será de mí?</p>
-
-      <p>Desde que hiciste mi corazón latir<br>
-      O desde que me empezaste a vestir</p>
-
-      <p>Quiero abrazarte y gritar amén<br>
-      Que por fin, al fin, yo te encontré<br>
-      Yo te encontré</p>
-
-      <p>Correr hasta que duelan los pies<br>
-      Y decir: No te vuelvo a perder<br>
-      No otra vez</p>
-
-      <p>Gracias por tu esfuerzo y por tu amor<br>
-      Por no dudar en darnos lo mejor<br>
-      Por ser nuestro defensor<br>
-      Protegernos de todo el dolor</p>
-
-      <p>Me enseñaste a manejar<br>
-      Me llevaste a navegar<br>
-      Por no dejar de trabajar<br>
-      Carajo, me diste un hogar</p>
-
-      <p>Hoy brindo por tenerte aquí<br>
-      Por verte sonreír por mí<br>
-      Por darme ganas de vivir<br>
-      Y por todo lo que aprendí</p>
-
-      <p>Quiero abrazarte y gritar amén<br>
-      Que por fin, al fin, yo te encontré<br>
-      Yo te encontré</p>
-
-      <p>Correr hasta que duelan los pies<br>
-      Y decir: No te vuelvo a perder<br>
-      No otra vez</p>
-
-      <p>Porque el tatuaje en tu muñeca<br>
-      Nos volverá a juntar<br>
-      Cuando llegue a ese lugar<br>
-      Tan hermoso, otro hogar</p>
-
-      <p>Estando aquí me siento diferente<br>
-      Privilegiado de tenerte frente a frente<br>
-      Me siento libre y transparente<br>
-      Es puro amor y vida todo lo que mi alma siente</p>
-
-      <p>Y siendo honesto yo nunca sentí<br>
-      Nada hasta que por fin te conocí<br>
-      Es claro que yo no viví<br>
-      Hasta que por fin nací<br>
-      Hasta que por fin nací</p>
+    <div class="lyrics-content" id="lyricsText">
+      <!-- Lyrics will be injected here via JS -->
     </div>
   </div>
 
@@ -1061,6 +1303,87 @@
     const TARGET_DATE = new Date('2026-02-14T00:00:00'); 
     const SECRET_CODE = "16402080077290";
     
+    /* --- LYRICS DATA --- */
+    const LYRICS = {
+      romantic: `
+        <p>Me duele el pecho por nunca confesarte<br>
+        Por ser amargo, por no ser tan constante<br>
+        Por no decirte que te amo a cada instante</p>
+        <p>Hoy brindo por tenerte aquí<br>
+        Por verte sonreír por mí<br>
+        Por darme ganas de vivir<br>
+        Y por todo lo que aprendí</p>
+        <p>Yo te digo todo, no me quiero arrepentir<br>
+        Que el día que te vayas, que tengas que partir<br>
+        No sé qué va a ser de mí<br>
+        Dime, ¿qué será de mí?</p>
+        <p>Desde que hiciste mi corazón latir<br>
+        O desde que me empezaste a vestir</p>
+        <p>Quiero abrazarte y gritar amén<br>
+        Que por fin, al fin, yo te encontré<br>
+        Yo te encontré</p>
+        <p>Correr hasta que duelan los pies<br>
+        Y decir: No te vuelvo a perder<br>
+        No otra vez</p>
+        <p>Gracias por tu esfuerzo y por tu amor<br>
+        Por no dudar en darnos lo mejor<br>
+        Por ser nuestro defensor<br>
+        Protegernos de todo el dolor</p>
+        <p>Me enseñaste a manejar<br>
+        Me llevaste a navegar<br>
+        Por no dejar de trabajar<br>
+        Carajo, me diste un hogar</p>
+        <p>Hoy brindo por tenerte aquí<br>
+        Por verte sonreír por mí<br>
+        Por darme ganas de vivir<br>
+        Y por todo lo que aprendí</p>
+        <p>Quiero abrazarte y gritar amén<br>
+        Que por fin, al fin, yo te encontré<br>
+        Yo te encontré</p>
+        <p>Correr hasta que duelan los pies<br>
+        Y decir: No te vuelvo a perder<br>
+        No otra vez</p>
+        <p>Porque el tatuaje en tu muñeca<br>
+        Nos volverá a juntar<br>
+        Cuando llegue a ese lugar<br>
+        Tan hermoso, otro hogar</p>
+        <p>Estando aquí me siento diferente<br>
+        Privilegiado de tenerte frente a frente<br>
+        Me siento libre y transparente<br>
+        Es puro amor y vida todo lo que mi alma siente</p>
+        <p>Y siendo honesto yo nunca sentí<br>
+        Nada hasta que por fin te conocí<br>
+        Es claro que yo no viví<br>
+        Hasta que por fin nací<br>
+        Hasta que por fin nací</p>
+      `,
+      passion: `
+        <p>Di Mi Nombre<br>Call Out My Name</p>
+        <p>Nos encontramos<br>We found each other</p>
+        <p>Te ayudé a salir de un lugar roto<br>I helped you out of a broken place</p>
+        <p>Me diste comodidad<br>You gave me comfort</p>
+        <p>Pero enamorarme de ti fue mi error<br>But falling for you was my mistake</p>
+        <p>Te puse por las nubes, te puse por las nubes<br>I put you on top, I put you on top</p>
+        <p>Me encargué de ti tan orgulloso y abiertamente<br>I claimed you so proud and openly</p>
+        <p>Y cuando los tiempos eran difíciles, cuando los tiempos eran difíciles<br>And when times were rough, when times were rough</p>
+        <p>Me aseguré de tenerte cerca de mí<br>I made sure I held you close to me</p>
+        <p>Así que di mi nombre (di mi nombre)<br>So call out my name (call out my name)</p>
+        <p>Di mi nombre cuando te bese tan suavemente<br>Call out my name when I kiss you so gently</p>
+        <p>Quiero que te quedes (quiero que te quedes)<br>I want you to stay (I want you to stay)</p>
+        <p>Quiero que te quedes aunque no me quieras<br>I want you to stay even though you don't want me</p>
+        <p>Chica, ¿por qué no puedes esperar? (¿Por qué no puedes esperar, nena?)<br>Girl, why can't you wait? (Why can't you wait, baby?)</p>
+        <p>Chica, ¿por qué no puedes esperar hasta que no esté enamorado?<br>Girl, why can't you wait till I fall out of love?</p>
+        <p>¿No dirás mi nombre? (Di mi nombre)<br>Won't you call out my name? (Call out my name)</p>
+        <p>Chica, di mi nombre, y estaré en camino<br>Girl, call out my name, and I'll be on my way</p>
+        <p>Dije que no sentía nada, amor, pero mentí<br>I said I didn't feel nothing, baby, but I lied</p>
+        <p>Casi me corté un pedazo para tu vida<br>I almost cut a piece of myself for your life</p>
+        <p>Supongo que era solo otra parada en boxes<br>Guess I was just another pit stop</p>
+        <p>Hasta que te decidiste<br>Till you made up your mind</p>
+        <p>Solo malgastaste mi tiempo<br>You just wasted my time</p>
+        <p>Estás en las nubes, te puse por las nubes<br>You're on top, I put you on top</p>
+      `
+    };
+
     /* --- LOCK SCREEN LOGIC --- */
     function updateCountdown() {
       const now = new Date();
@@ -1176,35 +1499,180 @@
     function closeLyrics() { document.getElementById('lyricsModal').classList.remove('show'); }
 
     /* --- CAROUSEL LOGIC --- */
-    let carouselIndex = 0;
+    // CAROUSEL REMOVED
     
-    function getCardWidth() {
-      // Desktop: 350px card + 40px gap = 390px
-      // Mobile: 280px card + 20px gap = 300px
-      return window.innerWidth < 600 ? 300 : 390;
-    }
+    /* --- MODE SWITCHING & VIDEO --- */
+    let isFireMode = false;
     
-    function moveCarousel(dir) {
-      const track = document.getElementById('passionTrack');
-      if (!track) return;
+    function toggleMode() {
+      isFireMode = !isFireMode;
+      const body = document.body;
+      const icon = document.getElementById('modeIcon');
+      const text = document.getElementById('modeText');
+      const musicInfo = document.querySelector('.song-title');
+      const artistInfo = document.querySelector('.song-artist');
+      const audio = document.getElementById('bgMusic');
+      const source = audio.querySelector('source');
       
-      const totalCards = track.children.length;
+      const romContent = document.getElementById('romanticContent');
+      const fireContent = document.getElementById('fireContent');
       
-      carouselIndex += dir;
+      // PDF Elements
+      const pdfFrame = document.getElementById('pdfFrame');
+      const pdfLink = document.getElementById('pdfLink');
       
-      if (carouselIndex < 0) {
-        carouselIndex = totalCards - 1;
-      } else if (carouselIndex >= totalCards) {
-        carouselIndex = 0;
+      // Book Visual Elements
+      const bookCover = document.getElementById('bookCoverDisplay');
+      const bookIcon = document.getElementById('bookIcon');
+      const bookTitle = document.getElementById('bookTitle');
+      const bookAuthor = document.getElementById('bookAuthor');
+      const bookDesc = document.getElementById('bookDescription');
+
+      if (isFireMode) {
+        // Switch to FIRE
+        body.classList.add('fire-mode');
+        icon.innerText = '🔥';
+        text.innerText = 'Pasión';
+        
+        // Change Music
+        source.src = 'Musica/CallOutMyName.mp3';
+        musicInfo.innerText = "Call Out My Name";
+        artistInfo.innerText = "The Weeknd";
+        
+        // Change Lyrics
+        document.getElementById('lyricsText').innerHTML = LYRICS.passion;
+        
+        // Change Book Content (PDF)
+        const bookPath = 'Libro/50-sombras-de-grey-pr_21dab7f8f393346568fb794f2369372d.pdf';
+        if(pdfFrame) pdfFrame.src = bookPath;
+        if(pdfLink) pdfLink.href = bookPath;
+        
+        // Change Book Visuals (Cover & Text)
+        if(bookCover) bookCover.style.background = 'linear-gradient(135deg, #2c2c2c, #000000)'; // Dark Grey/Black
+        if(bookIcon) bookIcon.innerText = '👔';
+        if(bookTitle) {
+            bookTitle.innerText = '50 Sombras de Grey';
+            bookTitle.style.color = '#d4af37'; // Gold/Silverish
+        }
+        if(bookAuthor) bookAuthor.innerText = 'E.L. James';
+        if(bookDesc) {
+            bookDesc.innerHTML = '"El control es solo una ilusión, pero el placer es real."<br>Una historia para explorar los límites del deseo.';
+        }
+        
+        // Change Letter Content
+        romContent.classList.add('content-hidden');
+        fireContent.classList.remove('content-hidden');
+        
+      } else {
+        // Switch to ROMANTIC
+        body.classList.remove('fire-mode');
+        icon.innerText = '💖';
+        text.innerText = 'Romántico';
+        
+        // Change Music
+        source.src = 'Musica/Aurora.mp3';
+        musicInfo.innerText = "Aurora";
+        artistInfo.innerText = "Humbe";
+        
+        // Change Lyrics
+        document.getElementById('lyricsText').innerHTML = LYRICS.romantic;
+
+        // Change Book Content (PDF)
+        const bookPath = 'Libro/El_principito-Antoine_de_Saint-Exupery.pdf';
+        if(pdfFrame) pdfFrame.src = bookPath;
+        if(pdfLink) pdfLink.href = bookPath;
+
+        // Change Book Visuals (Cover & Text)
+        if(bookCover) bookCover.style.background = 'linear-gradient(135deg, #1a237e, #3949ab)'; // Blue
+        if(bookIcon) bookIcon.innerText = '👑';
+        if(bookTitle) {
+            bookTitle.innerText = 'El Principito';
+            bookTitle.style.color = '#ffd700'; // Yellow/Gold
+        }
+        if(bookAuthor) bookAuthor.innerText = 'Antoine de Saint-Exupéry';
+        if(bookDesc) {
+            bookDesc.innerHTML = '"Solo con el corazón se puede ver bien; lo esencial es invisible a los ojos."<br>Una historia para recordarnos la belleza de las cosas simples.';
+        }
+
+        // Change Letter Content
+        fireContent.classList.add('content-hidden');
+        romContent.classList.remove('content-hidden');
       }
       
-      const translateX = -(carouselIndex * getCardWidth());
-      track.style.transform = `translateX(${translateX}px)`;
+      // Reload and play audio if it was playing or just load it
+      const wasPlaying = !audio.paused;
+      audio.load();
+      if(wasPlaying || isFireMode) { // Auto play on switch if desire
+         audio.play().then(() => {
+           document.getElementById('playPauseBtn').innerText = '⏸';
+         }).catch(e => console.log(e));
+      }
+      
+      // Reset letter pages
+      currentPage = 0;
+      updateLetterPages();
     }
+    
+    function updateLetterPages() {
+        // Re-query active pages based on mode
+        const container = isFireMode ? document.getElementById('fireContent') : document.getElementById('romanticContent');
+        const pages = container.querySelectorAll('.letter-page');
+        
+        // Hide all first
+        document.querySelectorAll('.letter-page').forEach(p => p.classList.remove('active'));
+        
+        // Show first of current set
+        if(pages.length > 0) pages[0].classList.add('active');
+    }
+
+    // Override changePage to scope to current mode
+    function changePage(dir) {
+      const container = isFireMode ? document.getElementById('fireContent') : document.getElementById('romanticContent');
+      const pages = container.querySelectorAll('.letter-page');
+      
+      // Find currently active index in this set
+      let activeIndex = -1;
+      pages.forEach((p, i) => {
+        if(p.classList.contains('active')) activeIndex = i;
+      });
+      
+      if(activeIndex === -1) activeIndex = 0;
+      
+      pages[activeIndex].classList.remove('active');
+      
+      let newIndex = activeIndex + dir;
+      if (newIndex < 0) newIndex = 0;
+      if (newIndex >= pages.length) newIndex = pages.length - 1;
+      
+      pages[newIndex].classList.add('active');
+      currentPage = newIndex; // Update global tracker if needed, though strictly local is better
+      
+      document.getElementById('prevBtn').disabled = (newIndex === 0);
+      document.getElementById('nextBtn').disabled = (newIndex === pages.length - 1);
+    }
+    
+    function openVideo() {
+      document.getElementById('videoModal').classList.add('show');
+      const v = document.getElementById('mainVideo');
+      if(v) v.play();
+    }
+    
+    function closeVideo() {
+      document.getElementById('videoModal').classList.remove('show');
+      const v = document.getElementById('mainVideo');
+      if(v) {
+        v.pause();
+        v.currentTime = 0;
+      }
+    }
+
 
     // Init
     setInterval(updateCountdown, 1000);
     updateCountdown();
+    
+    // Init Default Lyrics
+    document.getElementById('lyricsText').innerHTML = LYRICS.romantic;
     
     // Check if already unlocked in session
     if(sessionStorage.getItem('unlocked_index5_v2') === 'true') {
