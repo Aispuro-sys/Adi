@@ -30,6 +30,12 @@
       color: var(--text-main);
       overflow-x: hidden;
     }
+    body.locked {
+      overflow: hidden;
+      height: 100vh;
+      position: fixed;
+      width: 100%;
+    }
 
     /* --- MODE TOGGLE --- */
     .mode-toggle {
@@ -147,6 +153,7 @@
       justify-content: center;
       align-items: center;
       transition: opacity 0.8s ease, visibility 0.8s ease;
+      overflow: hidden;
     }
     #lockScreen.hidden {
       opacity: 0;
@@ -1442,6 +1449,7 @@
     function enterSite() {
       const lock = document.getElementById('lockScreen');
       lock.classList.add('hidden');
+      document.body.classList.remove('locked');
       sessionStorage.setItem('unlocked_index5_v2', 'true');
       
       // Start music on entry
@@ -1689,6 +1697,9 @@
     // Check if already unlocked in session
     if(sessionStorage.getItem('unlocked_index5_v2') === 'true') {
        document.getElementById('lockScreen').classList.add('hidden');
+       document.body.classList.remove('locked');
+    } else {
+       document.body.classList.add('locked');
     }
 
     // Particles
