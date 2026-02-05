@@ -188,36 +188,8 @@
       50% { transform: translate(30px, -30px) scale(1.1); }
     }
 
-    /* Navigation */
-    .nav-bar {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 15px;
-      padding: 12px 24px;
-      background: rgba(20, 20, 30, 0.6);
-      backdrop-filter: blur(16px);
-      border-radius: 50px;
-      border: 1px solid var(--glass-border);
-      z-index: 1000;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      padding: 8px 18px;
-      border-radius: 20px;
-    }
-    .nav-link:hover, .nav-link.active {
-      color: #fff;
-      background: rgba(255,255,255,0.1);
-      box-shadow: 0 0 15px rgba(255,255,255,0.05);
-    }
+    /* --- HAMBURGER MENU --- */
+    .menu-btn{position:fixed;top:25px;right:25px;z-index:10000;width:50px;height:50px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2)}.menu-btn:hover{background:rgba(255,255,255,0.2);transform:scale(1.1)}.menu-btn .bar{width:24px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s}.fullscreen-menu{position:fixed;inset:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity 0.4s ease}.fullscreen-menu.active{opacity:1;pointer-events:auto}.menu-links a{font-family:'Playfair Display',serif;font-size:2.2rem;color:rgba(255,255,255,0.8);text-decoration:none;margin:15px 0;display:block;text-align:center;transition:all 0.3s}.menu-links a:hover{color:#ffd700;transform:translateY(-3px);letter-spacing:2px}.close-menu{position:absolute;top:30px;right:30px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;transition:transform 0.3s}.close-menu:hover{transform:rotate(90deg);color:#ff4d6d}
 
     /* Main Container */
     .container {
@@ -726,16 +698,22 @@
     <div class="light-orb" style="bottom: 20%; right: 10%; width: 500px; height: 500px; background: radial-gradient(circle, var(--accent-blue), transparent); animation-delay: -5s;"></div>
   </div>
 
-  <!-- Navigation -->
-  <div class="nav-bar">
-    <a href="index.html" class="nav-link">Inicio</a>
-    <a href="AYECHAT/index.html" class="nav-link">Chat Privado</a>
-    <a href="index2.html" class="nav-link">Playlist</a>
-    <a href="index3.html" class="nav-link">Flores</a>
-    <a href="index4.html" class="nav-link active">Momentos</a>
-    <a href="index5.html" class="nav-link">San Valentín</a>
-    <a href="index6.html" class="nav-link">Melodía</a>
+  <!-- Hamburger Menu -->
+  <div class="menu-btn" onclick="toggleMenu()"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+  <div class="fullscreen-menu" id="fsMenu">
+    <button class="close-menu" onclick="toggleMenu()">✕</button>
+    <nav class="menu-links">
+      <a href="index.html">Inicio</a>
+      <a href="AYECHAT/index.html">Chat Privado</a>
+      <a href="index2.html">Playlist 2025</a>
+      <a href="index3.html">Flores</a>
+      <a href="index4.html">Momentos</a>
+      <a href="index5.html">San Valentín</a>
+      <a href="index6.html">Melodía</a>
+      <a href="snow_fox/dist/index.html">Zorro</a>
+    </nav>
   </div>
+  <script>function toggleMenu(){document.getElementById('fsMenu').classList.toggle('active');}</script>
 
   <div class="container">
     

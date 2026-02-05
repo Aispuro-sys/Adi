@@ -179,64 +179,8 @@
             background: rgba(255, 255, 255, 0.02);
         }
 
-        .topbar {
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 50;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            background: rgba(0, 0, 0, 0.35);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        .nav {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
-        .brand .t {
-            font-family: 'Playfair Display', serif;
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.95);
-            letter-spacing: 0.5px;
-        }
-
-        .brand .s {
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            font-weight: 300;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-        }
-
-        .nav-links a {
-            color: rgba(255, 255, 255, 0.95);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 999px;
-            transition: all 0.2s;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid transparent;
-        }
-
-        .nav-links a:hover {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
+        /* --- HAMBURGER MENU --- */
+        .menu-btn{position:fixed;top:25px;right:25px;z-index:10000;width:50px;height:50px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2)}.menu-btn:hover{background:rgba(255,255,255,0.2);transform:scale(1.1)}.menu-btn .bar{width:24px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s}.fullscreen-menu{position:fixed;inset:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity 0.4s ease}.fullscreen-menu.active{opacity:1;pointer-events:auto}.menu-links a{font-family:'Playfair Display',serif;font-size:2.2rem;color:rgba(255,255,255,0.8);text-decoration:none;margin:15px 0;display:block;text-align:center;transition:all 0.3s}.menu-links a:hover{color:#ffd700;transform:translateY(-3px);letter-spacing:2px}.close-menu{position:absolute;top:30px;right:30px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;transition:transform 0.3s}.close-menu:hover{transform:rotate(90deg);color:#ff4d6d}
 
         .glass-panel {
             position: relative;
@@ -663,23 +607,24 @@
 </head>
 <body onload="brython()">
     <div class="flower-rain" id="flowerRain"></div>
-    <div class="topbar">
-        <div class="nav">
-            <div class="brand">
-                <div class="t">Para Adi</div>
-                <div class="s">Flores</div>
-            </div>
-            <div class="nav-links">
-                <a href="index.html">Volver</a>
-                <a href="AYECHAT/index.html">Chat Privado</a>
-                <a href="index2.html">Playlist 2025</a>
-                <a href="index4.html">Momentos</a>
-                <a href="index5.html">San Valentín</a>
-                <a href="index6.html">Melodía</a>
-                <a href="#dibujo">Dibujar</a>
-            </div>
-        </div>
+    
+    <!-- Hamburger Menu -->
+    <div class="menu-btn" onclick="toggleMenu()"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+    <div class="fullscreen-menu" id="fsMenu">
+        <button class="close-menu" onclick="toggleMenu()">✕</button>
+        <nav class="menu-links">
+            <a href="index.html">Inicio</a>
+            <a href="AYECHAT/index.html">Chat Privado</a>
+            <a href="index2.html">Playlist 2025</a>
+            <a href="index3.html">Flores</a>
+            <a href="index4.html">Momentos</a>
+            <a href="index5.html">San Valentín</a>
+            <a href="index6.html">Melodía</a>
+            <a href="snow_fox/dist/index.html">Zorro</a>
+            <a href="#dibujo" onclick="toggleMenu()">Dibujar</a>
+        </nav>
     </div>
+    <script>function toggleMenu(){document.getElementById('fsMenu').classList.toggle('active');}</script>
     <div class="container">
         <section class="hero-section" id="flores">
             <div class="glass-panel">
