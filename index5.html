@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
   <title>Para Adi — San Valentín</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
@@ -1716,6 +1718,22 @@
       p.style.color = colors[Math.floor(Math.random()*3)];
       bg.appendChild(p);
     }
+
+    // Prevent Safari Reader Mode - inject invisible interactive elements
+    (function preventReaderMode() {
+      // Add hidden video element (Safari won't show Reader for pages with video)
+      const v = document.createElement('video');
+      v.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+      v.setAttribute('playsinline', '');
+      v.setAttribute('muted', '');
+      document.body.appendChild(v);
+      
+      // Add hidden form elements
+      const f = document.createElement('form');
+      f.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;';
+      f.innerHTML = '<input type="hidden" name="r"><button type="button"></button>';
+      document.body.appendChild(f);
+    })();
   </script>
 </body>
 </html>
