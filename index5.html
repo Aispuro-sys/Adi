@@ -73,7 +73,120 @@
     }
 
     /* --- HAMBURGER MENU --- */
-    .menu-btn{position:fixed;top:25px;right:25px;z-index:10000;width:50px;height:50px;background:rgba(255,255,255,0.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.2);border-radius:50%;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;cursor:pointer;transition:all 0.3s ease;box-shadow:0 4px 15px rgba(0,0,0,0.2)}.menu-btn:hover{background:rgba(255,255,255,0.2);transform:scale(1.1)}.menu-btn .bar{width:24px;height:2px;background:#fff;border-radius:2px;transition:all 0.3s}.fullscreen-menu{position:fixed;inset:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(20px);z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;opacity:0;pointer-events:none;transition:opacity 0.4s ease}.fullscreen-menu.active{opacity:1;pointer-events:auto}.menu-links a{font-family:'Playfair Display',serif;font-size:2.2rem;color:rgba(255,255,255,0.8);text-decoration:none;margin:15px 0;display:block;text-align:center;transition:all 0.3s}.menu-links a:hover{color:#ffd700;transform:translateY(-3px);letter-spacing:2px}.close-menu{position:absolute;top:30px;right:30px;background:none;border:none;color:#fff;font-size:2.5rem;cursor:pointer;transition:transform 0.3s}.close-menu:hover{transform:rotate(90deg);color:#ff4d6d}
+    .menu-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 10000;
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.3), rgba(255, 133, 162, 0.2));
+      backdrop-filter: blur(15px);
+      border: 2px solid rgba(255, 77, 109, 0.4);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 8px 32px rgba(255, 77, 109, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .menu-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.5), rgba(255, 133, 162, 0.4));
+      transform: scale(1.08) rotate(3deg);
+      box-shadow: 0 12px 40px rgba(255, 77, 109, 0.5);
+      border-color: rgba(255, 77, 109, 0.7);
+    }
+    .menu-btn .bar {
+      width: 26px;
+      height: 3px;
+      background: linear-gradient(90deg, #fff, #ffccd5);
+      border-radius: 3px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .menu-btn:hover .bar:nth-child(1) { transform: translateX(-3px); }
+    .menu-btn:hover .bar:nth-child(3) { transform: translateX(3px); }
+    
+    .fullscreen-menu {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(10, 5, 15, 0.98), rgba(30, 10, 20, 0.98));
+      backdrop-filter: blur(25px);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .fullscreen-menu.active { opacity: 1; pointer-events: auto; }
+    .fullscreen-menu::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(255, 77, 109, 0.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    
+    .menu-links a {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      margin: 12px 0;
+      padding: 8px 30px;
+      display: block;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      border-radius: 50px;
+      position: relative;
+    }
+    .menu-links a::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 77, 109, 0.2), transparent);
+      border-radius: 50px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .menu-links a:hover::before { opacity: 1; }
+    .menu-links a:hover {
+      color: #ffd700;
+      transform: translateY(-4px) scale(1.05);
+      letter-spacing: 3px;
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    
+    .close-menu {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 54px;
+      height: 54px;
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.4), rgba(255, 77, 109, 0.2));
+      border: 2px solid rgba(255, 77, 109, 0.5);
+      border-radius: 16px;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 25px rgba(255, 77, 109, 0.3);
+    }
+    .close-menu:hover {
+      transform: rotate(90deg) scale(1.1);
+      background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+      border-color: #ff4d6d;
+      box-shadow: 0 12px 35px rgba(255, 77, 109, 0.5);
+    }
 
     /* --- VIDEO MODAL --- */
     .video-modal {
@@ -102,31 +215,36 @@
 
     .btn-close-video {
       position: absolute;
-      top: 30px;
-      right: 30px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      top: 25px;
+      right: 25px;
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.9), rgba(255, 133, 162, 0.8));
+      border: 2px solid rgba(255, 255, 255, 0.3);
       color: #fff;
-      padding: 10px 24px;
-      border-radius: 50px;
+      padding: 14px 28px;
+      border-radius: 16px;
       cursor: pointer;
       font-family: 'Poppins', sans-serif;
-      font-size: 0.95rem;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
+      font-size: 1rem;
+      backdrop-filter: blur(15px);
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       z-index: 7001;
       text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 500;
+      letter-spacing: 2px;
+      font-weight: 600;
+      box-shadow: 0 8px 30px rgba(255, 77, 109, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
     }
     .btn-close-video:hover {
-      background: var(--accent-pink);
-      border-color: var(--accent-pink);
-      transform: translateY(-2px) scale(1.05);
-      box-shadow: 0 10px 25px rgba(255, 77, 109, 0.4);
+      background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+      border-color: #fff;
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 15px 40px rgba(255, 77, 109, 0.6);
+    }
+    .btn-close-video span {
+      font-size: 1.3rem;
+      font-weight: bold;
     }
     
     .video-caption {
@@ -230,6 +348,121 @@
     .lock-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(255, 77, 109, 0.4); }
     .error-msg { color: #ff6b6b; margin-top: 15px; font-size: 0.9rem; opacity: 0; min-height: 20px; }
     .error-msg.show { opacity: 1; }
+    
+    .almost-there-msg {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.2), rgba(255, 215, 0, 0.15));
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 15px;
+      padding: 15px 20px;
+      margin: 15px 0;
+      color: #ffd700;
+      font-size: 0.95rem;
+      font-style: italic;
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
+    }
+
+    /* Promise Card Styles */
+    .promise-card {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.1), rgba(255, 215, 0, 0.08));
+      border: 1px solid rgba(255, 77, 109, 0.2);
+      border-radius: 20px;
+      padding: 40px 30px;
+      max-width: 500px;
+      text-align: center;
+    }
+    .promise-intro {
+      font-size: 1.3rem;
+      color: #8a5a5a;
+      margin-bottom: 25px;
+      line-height: 1.8;
+    }
+    .promise-question {
+      font-size: 1.5rem;
+      color: #c9184a;
+      font-weight: 500;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+    .promise-answer {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .promise-btn {
+      background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+      color: #fff;
+      padding: 14px 35px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border: none;
+      box-shadow: 0 8px 25px rgba(255, 77, 109, 0.4);
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      font-family: 'Poppins', sans-serif;
+    }
+    .promise-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 12px 35px rgba(255, 77, 109, 0.6);
+    }
+    .promise-btn:active {
+      transform: scale(0.95);
+    }
+    .promise-btn.clicked {
+      background: linear-gradient(135deg, #ffd700, #ffb347);
+      animation: pulseBtn 0.5s ease;
+    }
+    @keyframes pulseBtn {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    
+    .heart-explosion {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 100;
+    }
+    .floating-heart {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: floatHeart 2s ease-out forwards;
+      opacity: 0;
+    }
+    @keyframes floatHeart {
+      0% { opacity: 1; transform: translate(0, 0) scale(0.5); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(1.2); }
+    }
+    
+    .promise-card {
+      position: relative;
+      overflow: visible;
+    }
+    
+    .celebration-msg {
+      animation: fadeInUp 0.8s ease forwards;
+      color: #c9184a;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .promise-footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #a08080;
+      font-style: italic;
+    }
 
     /* --- NAVIGATION --- */
     .nav-bar {
@@ -286,7 +519,7 @@
       font-size: 1.1rem;
       color: var(--text-muted);
       max-width: 600px;
-      margin: 5px auto 0;
+      margin: 5px auto 25px;
       line-height: 1.6;
       text-align: center;
     }
@@ -511,20 +744,7 @@
       width: 24px; height: 24px; stroke-width: 2; stroke: currentColor;
     }
 
-    /* Modal close button specific override */
-    .pdf-modal .close-letter {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      border-radius: 30px;
-      padding: 8px 24px;
-      color: #fff;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: inline-block;
-      width: auto;
-      height: auto;
-    }
+    /* Modal close button specific override - DEPRECATED, using .pdf-btn now */
 
     /* --- BOOK SECTION --- */
     .book-section {
@@ -683,11 +903,66 @@
     
     /* PDF MODAL */
     .pdf-modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 6000;
-      display: none; flex-direction: column; padding: 20px;
+      position: fixed; 
+      inset: 0; 
+      background: linear-gradient(135deg, rgba(0,0,0,0.97), rgba(20, 5, 15, 0.97)); 
+      z-index: 6000;
+      display: none; 
+      flex-direction: column; 
+      padding: 20px;
     }
     .pdf-modal.show { display: flex; }
-    .pdf-frame { flex: 1; width: 100%; border: none; background: #fff; border-radius: 8px; }
+    .pdf-frame { 
+      flex: 1; 
+      width: 100%; 
+      border: none; 
+      background: #fff; 
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    
+    .pdf-modal .pdf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      gap: 15px;
+    }
+    
+    .pdf-btn {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.2), rgba(255, 133, 162, 0.15));
+      border: 2px solid rgba(255, 77, 109, 0.4);
+      color: #fff;
+      padding: 14px 28px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 6px 20px rgba(255, 77, 109, 0.2);
+    }
+    .pdf-btn:hover {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.5), rgba(255, 133, 162, 0.4));
+      border-color: rgba(255, 77, 109, 0.8);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(255, 77, 109, 0.4);
+    }
+    .pdf-btn.close-btn {
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.8), rgba(255, 133, 162, 0.7));
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    .pdf-btn.close-btn:hover {
+      background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+      border-color: #fff;
+    }
 
     /* MUSIC WIDGET */
     .music-widget {
@@ -730,22 +1005,29 @@
       position: absolute;
       top: 20px;
       right: 20px;
-      background: rgba(255, 77, 109, 0.8);
-      border: none;
+      background: linear-gradient(135deg, rgba(255, 77, 109, 0.9), rgba(255, 133, 162, 0.8));
+      border: 2px solid rgba(255, 255, 255, 0.3);
       color: white;
-      padding: 10px 20px;
-      border-radius: 30px;
+      padding: 14px 28px;
+      border-radius: 16px;
       font-weight: 600;
+      font-size: 1rem;
       cursor: pointer;
-      backdrop-filter: blur(5px);
+      backdrop-filter: blur(15px);
       z-index: 100;
-      transition: all 0.3s;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+      box-shadow: 0 8px 30px rgba(255, 77, 109, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
     .modal-close-btn:hover {
-      background: #ff4d6d;
-      transform: scale(1.05);
-      box-shadow: 0 8px 20px rgba(255, 77, 109, 0.4);
+      background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+      border-color: #fff;
+      transform: translateY(-3px) scale(1.08);
+      box-shadow: 0 15px 40px rgba(255, 77, 109, 0.6);
     }
 
     .lyrics-content {
@@ -802,11 +1084,25 @@
         margin: 0 5px; 
       }
       
+      .modal-close-btn,
+      .btn-close-video,
+      .pdf-btn {
+        padding: 10px 18px;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border-radius: 12px;
+      }
       .modal-close-btn {
         top: 10px;
         right: 10px;
-        padding: 8px 16px;
-        font-size: 0.9rem;
+      }
+      .btn-close-video {
+        top: 15px;
+        right: 15px;
+      }
+      .pdf-header {
+        flex-wrap: wrap;
+        justify-content: center;
       }
       
       .lock-card {
@@ -841,6 +1137,11 @@
         <div class="lock-riddle">
           <p>"Soy el secreto que guardas hasta que llegue el momento."</p>
         </div>
+        <p id="almostThereMsg" class="almost-there-msg" style="display:none;">
+          ✨ Ya casi llega el momento... La espera hace más dulce el encuentro 💕
+          <br><span style="display:block; margin-top:10px; font-size:0.85rem; opacity:0.9;">No te desesperes, pronto podrás ver todo lo que preparé para ti 🦊</span>
+          <span style="display:block; margin-top:8px; font-weight:600; color:#ffb3c1;">— Att. tu Lalito 💕</span>
+        </p>
         <input type="password" id="passwordInput" class="lock-input" placeholder="Contraseña Secreta" />
         <button class="lock-btn" onclick="checkPassword()">Desbloquear</button>
         <div id="errorMsg" class="error-msg">Código incorrecto</div>
@@ -1088,6 +1389,25 @@
             <div class="letter-page centered">
                <img src="Images/carta%207.jpg" alt="Carta 7" class="letter-img">
             </div>
+
+            <!-- Page 15 (Special Final - Promise) -->
+            <div class="letter-page centered">
+              <div class="promise-card" id="promiseCard">
+                <p class="promise-intro">
+                  Este 14 de febrero marca solo el comienzo de nuestra historia...
+                </p>
+                <p class="promise-question">
+                  ¿Me permites seguir escribiéndola contigo? 💕
+                </p>
+                <div class="promise-answer">
+                  <button class="promise-btn" onclick="celebrateYes()" id="yesBtn">Sí, siempre ❤️</button>
+                </div>
+                <p class="promise-footer" id="promiseFooter">
+                  Cada día a tu lado es un capítulo que atesoro.
+                </p>
+                <div id="heartExplosion" class="heart-explosion"></div>
+              </div>
+            </div>
         </div>
 
         <!-- FIRE CONTENT (SEXUAL) -->
@@ -1275,7 +1595,7 @@
   <!-- VIDEO MODAL -->
   <div id="videoModal" class="video-modal">
     <button class="btn-close-video" onclick="closeVideo()">
-      <span style="font-size:1.2rem;">✕</span> Cerrar
+      <span>✕</span> Cerrar
     </button>
     <div class="video-container">
       <video controls loop id="mainVideo">
@@ -1288,9 +1608,13 @@
 
   <!-- PDF VIEWER -->
   <div id="pdfModal" class="pdf-modal">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <a id="pdfLink" href="Libro/El_principito-Antoine_de_Saint-Exupery.pdf" target="_blank" class="close-letter" style="text-decoration:none; background:rgba(255,255,255,0.15);">📄 Abrir Externo</a>
-      <button class="close-letter" style="color:#fff; position:static;" onclick="closeBook()">Cerrar</button>
+    <div class="pdf-header">
+      <a id="pdfLink" href="Libro/El_principito-Antoine_de_Saint-Exupery.pdf" target="_blank" class="pdf-btn">
+        <span>📄</span> Abrir Externo
+      </a>
+      <button class="pdf-btn close-btn" onclick="closeBook()">
+        <span>✕</span> Cerrar
+      </button>
     </div>
     <iframe id="pdfFrame" class="pdf-frame" src="Libro/El_principito-Antoine_de_Saint-Exupery.pdf"></iframe>
   </div>
@@ -1427,6 +1751,16 @@
       document.getElementById('hours').innerText = h < 10 ? '0'+h : h;
       document.getElementById('mins').innerText = m < 10 ? '0'+m : m;
       document.getElementById('secs').innerText = s < 10 ? '0'+s : s;
+      
+      // Show special message when 3 days or less remain
+      const almostMsg = document.getElementById('almostThereMsg');
+      if (almostMsg) {
+        if (d <= 3) {
+          almostMsg.style.display = 'block';
+        } else {
+          almostMsg.style.display = 'none';
+        }
+      }
     }
 
     function checkPassword() {
@@ -1677,6 +2011,42 @@
       document.getElementById('videoModal').classList.add('show');
       const v = document.getElementById('mainVideo');
       if(v) v.play();
+    }
+    
+    // Celebration function for "Sí, siempre" button
+    function celebrateYes() {
+      const btn = document.getElementById('yesBtn');
+      const container = document.getElementById('heartExplosion');
+      const footer = document.getElementById('promiseFooter');
+      
+      // Change button style
+      btn.classList.add('clicked');
+      btn.innerText = '¡Te quiero! 💕';
+      
+      // Create heart explosion
+      const hearts = ['❤️', '💕', '💖', '💗', '💓', '🦊', '✨', '🌹'];
+      for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('span');
+        heart.className = 'floating-heart';
+        heart.innerText = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+        heart.style.setProperty('--ty', (Math.random() - 0.5) * 200 - 50 + 'px');
+        heart.style.animationDelay = (Math.random() * 0.3) + 's';
+        container.appendChild(heart);
+        
+        // Remove after animation
+        setTimeout(() => heart.remove(), 2500);
+      }
+      
+      // Change footer message
+      if (footer) {
+        footer.innerHTML = '💕 ¡Gracias por decir que sí! Juntos escribiremos los capítulos más hermosos 💕';
+        footer.classList.add('celebration-msg');
+      }
+      
+      // Disable button after click
+      btn.onclick = null;
+      btn.style.cursor = 'default';
     }
     
     function closeVideo() {
