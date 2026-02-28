@@ -1,20 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Dear Sun</title>
-    <meta name="language" content="en-US">
-    <meta name="title" content="Dear Sun">
-    <meta name="description" content="Collecting this wasn't easy — your star is my motivation to keep going! Contributions are welcome too.">
-    <link rel="icon" type="image/x-icon" href="https://cdn.jsdelivr.net/gh/sun0225SUN/photos/img/20210715233345.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para Adi — Corazón</title>
     <link rel="stylesheet" href="css/love.css">
 </head>
 
 
 <body>
 
-    <audio autoplay="autopaly" loop="loop" id="audios" preload="auto">
-        <source src="MP3/1.mp3" />
+    <audio loop id="audios" preload="auto" autoplay>
+        <source src="MP3/FANTASIA LENTA.mp3" type="audio/mpeg" />
     </audio>
 
     <div class="container" onselectstart="return false;" unselectable="on" style="-moz-user-select:none;">
@@ -41,6 +38,22 @@
     </div>
 
     <script type="text/javascript" src="js/love.js"></script>
+    <script>
+        // Intentar reproducir música automáticamente
+        const audio = document.getElementById('audios');
+        
+        // Intento inicial
+        audio.play().catch(() => {
+            // Si falla, reproducir al primer click/touch
+            const playOnInteraction = () => {
+                audio.play();
+                document.removeEventListener('click', playOnInteraction);
+                document.removeEventListener('touchstart', playOnInteraction);
+            };
+            document.addEventListener('click', playOnInteraction);
+            document.addEventListener('touchstart', playOnInteraction);
+        });
+    </script>
 
 </body>
 

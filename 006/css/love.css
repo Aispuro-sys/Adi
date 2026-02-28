@@ -13,8 +13,7 @@ html, body {
 
 body {
     overflow: hidden;
-    background: linear-gradient(135deg, #1a0505 0%, #2a0808 50%, #160202 100%);
-    background-attachment: fixed;
+    background: white;
 }
 
 .container {
@@ -188,3 +187,79 @@ body {
 
 /*---------------------- footer -------------------------*/
 
+/* --- PLAY MUSIC BUTTON --- */
+.play-music-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background: linear-gradient(135deg, #ff4d6d, #ff85a2);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(255, 77, 109, 0.4);
+    transition: all 0.3s ease;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.play-music-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 35px rgba(255, 77, 109, 0.6);
+}
+
+.play-music-btn.playing {
+    background: linear-gradient(135deg, #ffd700, #ffb347);
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+    .container .love {
+        width: 280px;
+        height: 240px;
+        margin: -120px 0 0 -140px;
+        transform: scale(0.7);
+    }
+    
+    .love .block div {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .body_left {
+        width: 150px;
+        height: 150px;
+        bottom: 50px;
+    }
+    
+    .body_left img {
+        width: 100%;
+        height: auto;
+    }
+    
+    .play-music-btn {
+        top: 10px;
+        right: 10px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .container .love {
+        transform: scale(0.5);
+        margin: -100px 0 0 -130px;
+    }
+    
+    .body_left {
+        width: 120px;
+        height: 120px;
+        bottom: 30px;
+    }
+    
+    .footer {
+        bottom: 10px;
+    }
+}
