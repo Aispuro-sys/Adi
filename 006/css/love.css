@@ -12,7 +12,9 @@ html, body {
 }
 
 body {
-    overflow: hidden; 
+    overflow: hidden;
+    background: linear-gradient(135deg, #1a0505 0%, #2a0808 50%, #160202 100%);
+    background-attachment: fixed;
 }
 
 .container {
@@ -49,7 +51,7 @@ body {
     right: 0;
     position: absolute;
     visibility: hidden;
-    background-color: yellow;
+    background-color: transparent;
 }
 
 .love .block div {
@@ -58,9 +60,14 @@ body {
     position: absolute;
     background: url("../images/heart.png") no-repeat;
     background-size: contain;
-    /*background-color: #c40908;*/
-    /*border: 1px solid silver;*/
     box-sizing: border-box;
+    filter: drop-shadow(0 0 8px rgba(255, 77, 109, 0.6));
+    animation: heartPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes heartPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 
@@ -139,28 +146,24 @@ body {
     z-index: 99;
 }
 .footer .border .border-top {
-    /*width: 0;*/
-    /*display: inline-block;*/
-    border-top: 3px solid black;
+    border-top: 3px solid #ff4d6d;
     transform-origin: left center;
-    -webkit-animation: border 312 linear;
+    -webkit-animation: border 12s linear;
     -o-animation: border 12s linear;
     animation: border 12s linear;
     animation-fill-mode : both;
-    /*border-bottom: none;*/
+    box-shadow: 0 0 10px rgba(255, 77, 109, 0.5);
 }
 
 .footer .border .border-bottom {
-    /*width: 0;*/
-    /*display: inline-block;*/
     float: right;
-    border-top: 3px solid red;
+    border-top: 3px solid #ffd700;
     transform-origin: right center;
     -webkit-animation: border 7s linear 12s;
     -o-animation: border 7s linear 12s;
     animation: border 7s linear 12s;
     animation-fill-mode : both;
-    /*border-bottom: none;*/
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
 .footer .copyright {
