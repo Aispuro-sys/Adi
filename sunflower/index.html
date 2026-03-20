@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21 de Marzo - Flores Amarillas 🌻</title>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 50%, #f9e4b7 100%);
+            font-family: 'Playfair Display', Georgia, serif;
+            overflow-x: hidden;
+        }
+
+        /* ========== FASE 1: SOBRE ========== */
+        .envelope-scene {
+            perspective: 1200px;
+            width: 480px;
+            height: 380px;
+            position: relative;
+            filter: drop-shadow(0 30px 40px rgba(180, 160, 130, 0.35));
+        }
+
+        .envelope {
+            position: relative;
+            width: 480px;
+            height: 300px;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+            border-radius: 12px;
+        }
+
+        .envelope:hover { 
+            transform: translateY(-10px) scale(1.02);
+        }
+
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(175deg, #ffffff 0%, #fdfcfa 30%, #f8f4ed 70%, #f3ede3 100%);
+            border-radius: 12px;
+            box-shadow: 
+                inset 0 0 60px rgba(255, 255, 255, 0.8),
+                inset 0 -5px 20px rgba(200, 180, 150, 0.1);
+        }
+
+        .envelope-body::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            border-radius: 8px;
+        }
+
+        .envelope-lines {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+
+        .envelope-lines::before, .envelope-lines::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+
+        .envelope-lines::before { 
+            background: linear-gradient(135deg, transparent 0%, transparent 48%, rgba(230, 220, 205, 0.5) 50%, transparent 52%, transparent 100%);
+            top: 0; 
+            left: 0; 
+        }
+        .envelope-lines::after { 
+            background: linear-gradient(225deg, transparent 0%, transparent 48%, rgba(230, 220, 205, 0.5) 50%, transparent 52%, transparent 100%);
+            top: 0; 
+            right: 0; 
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 58%;
+            background: linear-gradient(180deg, #fdfcfa 0%, #f5f0e8 60%, #ebe5da 100%);
+            transform-origin: top center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+            z-index: 10;
+        }
+
+        .flap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 40%, transparent 70%);
+            clip-path: polygon(0 0, 50% 100%, 100% 0);
+        }
+
+        .flap::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(200, 180, 150, 0.3), transparent);
+        }
+
+        .wax-seal {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 75px;
+            height: 75px;
+            background: radial-gradient(ellipse at 30% 25%, #f5c862 0%, #e8a83d 25%, #d4923a 50%, #c07830 75%, #a86828 100%);
+            border-radius: 50%;
+            z-index: 15;
+            box-shadow: 
+                0 8px 25px rgba(160, 100, 40, 0.5),
+                0 3px 8px rgba(0,0,0,0.2),
+                inset 0 -6px 15px rgba(120, 70, 20, 0.4),
+                inset 0 6px 15px rgba(255, 220, 150, 0.5),
+                inset 0 0 10px rgba(200, 150, 80, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .wax-seal::before {
+            content: '♥';
+            font-size: 30px;
+            color: rgba(255, 250, 240, 0.95);
+            text-shadow: 
+                0 2px 4px rgba(120, 70, 20, 0.5),
+                0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .flower-decoration {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            font-size: 50px;
+            filter: drop-shadow(2px 3px 3px rgba(0,0,0,0.12));
+            z-index: 20;
+            transform: rotate(-15deg);
+            transition: transform 0.3s ease;
+        }
+
+        .envelope:hover .flower-decoration {
+            transform: rotate(-5deg) scale(1.1);
+        }
+
+        .envelope-text {
+            display: none;
+        }
+
+        .envelope.open .flap { transform: rotateX(180deg); }
+        .envelope.open .wax-seal { transform: translate(-50%, 50%) scale(0); }
+
+        .letter-mini {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            width: calc(100% - 50px);
+            height: calc(100% - 40px);
+            background: linear-gradient(180deg, #fffef9 0%, #fdf8e8 100%);
+            border-radius: 4px;
+            transform: translateY(0);
+            transition: transform 0.8s ease 0.3s;
+            z-index: 5;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .envelope.open .letter-mini { transform: translateY(-300px); }
+
+        .instruction {
+            position: absolute;
+            bottom: -55px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            color: #c9893a;
+            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.5);
+        }
+
+        @keyframes pulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+
+        /* ========== FASE 2: CARTA ========== */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            z-index: 50;
+        }
+
+        .overlay.show { opacity: 1; visibility: visible; }
+
+        .letter-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 600px;
+            background: linear-gradient(180deg, #fffef9 0%, #fdf8e8 100%);
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 25px 60px rgba(139, 119, 87, 0.4);
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.6s ease;
+            border: 3px solid #e8dcc8;
+        }
+
+        .letter-content.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+
+        .letter-content::before {
+            content: '';
+            position: absolute;
+            top: 10px; left: 10px; right: 10px; bottom: 10px;
+            border: 2px dashed #d4c4a8;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .letter-header { text-align: center; margin-bottom: 25px; }
+
+        .letter-title {
+            font-family: 'Dancing Script', cursive;
+            font-size: 32px;
+            color: #c9893a;
+            margin-bottom: 10px;
+        }
+
+        .letter-date { font-size: 14px; color: #a08060; font-style: italic; }
+
+        .letter-body {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #5a4a3a;
+            text-align: justify;
+            margin-bottom: 25px;
+        }
+
+        .letter-body p { margin-bottom: 15px; text-indent: 20px; }
+
+        .letter-signature {
+            text-align: right;
+            font-family: 'Dancing Script', cursive;
+            font-size: 24px;
+            color: #c9893a;
+        }
+
+        .flower-corner { position: absolute; font-size: 50px; opacity: 0.7; }
+        .flower-corner.top-left { top: -15px; left: -15px; transform: rotate(-30deg); }
+        .flower-corner.bottom-right { bottom: -15px; right: -15px; transform: rotate(150deg); }
+
+        .see-flower-btn {
+            display: block;
+            margin: 20px auto 0;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #f4d03f 0%, #e8a849 100%);
+            color: #5a4a3a;
+            border: none;
+            font-family: 'Dancing Script', cursive;
+            font-size: 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(232, 168, 73, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .see-flower-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(232, 168, 73, 0.5); }
+
+        /* ========== FASE 3: GIRASOL ========== */
+        .sunflower-scene {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #fef9e7 0%, #fdebd0 50%, #f9e4b7 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s ease;
+            z-index: 200;
+        }
+
+        .sunflower-scene.show { opacity: 1; visibility: visible; }
+
+        .sunflower-scene h1 {
+            color: #c9893a;
+            font-family: 'Dancing Script', cursive;
+            font-size: 38px;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.5);
+        }
+
+        .canvas-container {
+            background: linear-gradient(180deg, #fffefa 0%, #fef9ec 50%, #fdf5e6 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 50px rgba(180, 150, 100, 0.25),
+                0 5px 15px rgba(139, 119, 87, 0.15),
+                inset 0 0 40px rgba(255, 255, 255, 0.6);
+            border: 3px solid #e8dcc8;
+            position: relative;
+        }
+
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            border: 2px dashed #ddd0b8;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        .canvas-container::after {
+            content: '🌻';
+            position: absolute;
+            top: -15px;
+            right: -15px;
+            font-size: 35px;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.15));
+        }
+
+        #canvas {
+            background: linear-gradient(180deg, #fefdfb 0%, #fdf9f0 100%);
+            border-radius: 8px;
+            max-width: 85vw;
+            max-height: 55vh;
+            display: block;
+        }
+
+        .loading {
+            color: #5a4a3a;
+            font-size: 18px;
+            margin-top: 25px;
+            font-family: 'Dancing Script', cursive;
+            text-align: center;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #f4d03f 0%, #e8a849 100%);
+            color: #5a4a3a;
+            border: none;
+            font-family: 'Dancing Script', cursive;
+            font-size: 18px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 300;
+            box-shadow: 0 4px 15px rgba(232, 168, 73, 0.4);
+        }
+
+        .back-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 6px 20px rgba(232, 168, 73, 0.5); 
+        }
+
+        /* Pétalos */
+        .petal {
+            position: fixed;
+            font-size: 20px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1000;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            0% { opacity: 1; transform: translateY(-20px) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(100vh) rotate(360deg); }
+        }
+
+        /* Ocultar fases */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <!-- FASE 1: SOBRE -->
+    <div class="envelope-scene" id="envelopeScene">
+        <div class="envelope" id="envelope">
+            <div class="envelope-body">
+                <div class="envelope-lines"></div>
+            </div>
+            <div class="letter-mini"></div>
+            <div class="flap"></div>
+            <div class="wax-seal"></div>
+            <div class="flower-decoration">🌼</div>
+            <div class="envelope-text">Para: Mi persona especial</div>
+            <div class="instruction">✨ Haz clic para abrir ✨</div>
+        </div>
+    </div>
+
+    <!-- FASE 2: CARTA -->
+    <div class="overlay" id="overlay"></div>
+    <div class="letter-content" id="letterContent">
+        <div class="flower-corner top-left">🌻</div>
+        <div class="flower-corner bottom-right">🌻</div>
+        
+        <div class="letter-header">
+            <h1 class="letter-title">Una Declaración de Eterna Primavera</h1>
+            <p class="letter-date">21 de Marzo, 2026</p>
+        </div>
+        
+        <div class="letter-body">
+            <p>Se rumorea que quien recibe una flor amarilla este día está destinada a ser amada con una intensidad que desafía al tiempo mismo. Me encargaré personalmente de que ese rumor sea la verdad más absoluta de nuestra vida.</p>
+            
+            <p>Ni el más hábil de los artistas podría pintar un amarillo tan vibrante como el que provocas en mi corazón cada vez que sonríes. Eres mi primavera eterna, mi sol en días nublados, mi flor más preciada.</p>
+            
+            <p>Que este 21 de marzo sea el primero de muchos en los que te recuerde lo especial que eres para mí. Como los girasoles que siempre buscan la luz, yo siempre te buscaré a ti.</p>
+        </div>
+        
+        <div class="letter-signature">
+            Con todo mi amor,<br>
+            Eduardo Aispuro 💛
+        </div>
+
+        <button class="see-flower-btn" id="seeFlowerBtn">🌻 Ver tu Girasol 🌻</button>
+    </div>
+
+    <!-- FASE 3: GIRASOL -->
+    <div class="sunflower-scene" id="sunflowerScene">
+        <button class="back-btn" id="backBtn">← Volver a la carta</button>
+        <h1>🌻 Tu Girasol 🌻</h1>
+        <div class="canvas-container">
+            <canvas id="canvas" width="500" height="500"></canvas>
+        </div>
+        <div class="loading" id="loading">
+            Dibujando con amor...
+        </div>
+    </div>
+
+    <script>
+        // Elementos
+        const envelope = document.getElementById('envelope');
+        const overlay = document.getElementById('overlay');
+        const letterContent = document.getElementById('letterContent');
+        const envelopeScene = document.getElementById('envelopeScene');
+        const sunflowerScene = document.getElementById('sunflowerScene');
+        const seeFlowerBtn = document.getElementById('seeFlowerBtn');
+        const backBtn = document.getElementById('backBtn');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const loading = document.getElementById('loading');
+
+        let isEnvelopeOpen = false;
+        let sunflowerLoaded = false;
+        let regionsData = null;
+
+        // FASE 1: Abrir sobre
+        envelope.addEventListener('click', () => {
+            if (!isEnvelopeOpen) {
+                envelope.classList.add('open');
+                setTimeout(() => {
+                    overlay.classList.add('show');
+                    letterContent.classList.add('show');
+                    createPetals();
+                }, 800);
+                isEnvelopeOpen = true;
+            }
+        });
+
+        // Cerrar carta al hacer clic en overlay
+        overlay.addEventListener('click', () => {
+            overlay.classList.remove('show');
+            letterContent.classList.remove('show');
+        });
+
+        // FASE 2 -> FASE 3: Ver girasol
+        seeFlowerBtn.addEventListener('click', () => {
+            overlay.classList.remove('show');
+            letterContent.classList.remove('show');
+            envelopeScene.classList.add('hidden');
+            sunflowerScene.classList.add('show');
+            
+            if (!sunflowerLoaded) {
+                loadAndDrawSunflower();
+            }
+        });
+
+        // Volver a la carta
+        backBtn.addEventListener('click', () => {
+            sunflowerScene.classList.remove('show');
+            envelopeScene.classList.remove('hidden');
+            setTimeout(() => {
+                overlay.classList.add('show');
+                letterContent.classList.add('show');
+            }, 300);
+        });
+
+        // Crear pétalos
+        function createPetals() {
+            const petals = ['🌼', '🌻', '💛', '✨', '🌸'];
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const petal = document.createElement('div');
+                    petal.className = 'petal';
+                    petal.textContent = petals[Math.floor(Math.random() * petals.length)];
+                    petal.style.left = Math.random() * 100 + 'vw';
+                    petal.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    document.body.appendChild(petal);
+                    setTimeout(() => petal.remove(), 5000);
+                }, i * 150);
+            }
+        }
+
+        // Pétalos de fondo
+        setInterval(() => {
+            if (Math.random() > 0.7 && !sunflowerScene.classList.contains('show')) {
+                const petal = document.createElement('div');
+                petal.className = 'petal';
+                petal.textContent = '🌼';
+                petal.style.left = Math.random() * 100 + 'vw';
+                petal.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                document.body.appendChild(petal);
+                setTimeout(() => petal.remove(), 7000);
+            }
+        }, 2000);
+
+        // FASE 3: Dibujar girasol
+        async function loadAndDrawSunflower() {
+            try {
+                status.textContent = 'Cargando...';
+                const response = await fetch('resources/sunflowers.json');
+                const regions = await response.json();
+                
+                status.textContent = 'Preparando...';
+                
+                let minX = Infinity, maxX = -Infinity;
+                let minY = Infinity, maxY = -Infinity;
+                
+                for (const region of regions) {
+                    for (const point of region.contour) {
+                        minX = Math.min(minX, point[0]);
+                        maxX = Math.max(maxX, point[0]);
+                        minY = Math.min(minY, point[1]);
+                        maxY = Math.max(maxY, point[1]);
+                    }
+                }
+                
+                const width = maxX - minX;
+                const height = maxY - minY;
+                const scale = Math.min(450 / width, 450 / height);
+                const centerX = (minX + maxX) / 2;
+                const centerY = (minY + maxY) / 2;
+                const offsetX = canvas.width / 2;
+                const offsetY = canvas.height / 2;
+                
+                const totalRegions = regions.length;
+                let currentRegion = 0;
+                
+                function drawRegion() {
+                    if (currentRegion >= totalRegions) {
+                        loading.innerHTML = '¡Listo! 💛<br><small>Un girasol dibujado con amor para ti</small>';
+                        sunflowerLoaded = true;
+                        return;
+                    }
+                    
+                    const region = regions[currentRegion];
+                    const color = `rgb(${Math.round(region.color[0])}, ${Math.round(region.color[1])}, ${Math.round(region.color[2])})`;
+                    ctx.fillStyle = color;
+                    
+                    ctx.beginPath();
+                    const points = region.contour;
+                    
+                    let x = (points[0][0] - centerX) * scale + offsetX;
+                    let y = (points[0][1] - centerY) * scale + offsetY;
+                    ctx.moveTo(x, y);
+                    
+                    for (let j = 1; j < points.length; j++) {
+                        x = (points[j][0] - centerX) * scale + offsetX;
+                        y = (points[j][1] - centerY) * scale + offsetY;
+                        ctx.lineTo(x, y);
+                    }
+                    
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    currentRegion++;
+                    requestAnimationFrame(drawRegion);
+                }
+                
+                drawRegion();
+                
+            } catch (error) {
+                loading.textContent = 'Error: ' + error.message;
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
