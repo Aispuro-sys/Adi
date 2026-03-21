@@ -402,6 +402,261 @@
 
         /* Ocultar fases */
         .hidden { display: none !important; }
+
+        /* ========== RESPONSIVE MOBILE ========== */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            /* Sobre responsivo */
+            .envelope-scene {
+                width: 90vw;
+                max-width: 360px;
+                height: auto;
+                filter: drop-shadow(0 20px 30px rgba(180, 160, 130, 0.3));
+            }
+
+            .envelope {
+                width: 100%;
+                height: 220px;
+            }
+
+            .flap {
+                height: 55%;
+            }
+
+            .wax-seal {
+                width: 55px;
+                height: 55px;
+            }
+
+            .wax-seal::before {
+                font-size: 22px;
+            }
+
+            .flower-decoration {
+                font-size: 35px;
+                top: 5px;
+                left: 8px;
+            }
+
+            .letter-mini {
+                top: 18px;
+                left: 18px;
+                width: calc(100% - 36px);
+                height: calc(100% - 30px);
+            }
+
+            .envelope.open .letter-mini {
+                transform: translateY(-220px);
+            }
+
+            .instruction {
+                font-size: 16px;
+                bottom: -45px;
+            }
+
+            /* Carta responsiva */
+            .letter-content {
+                width: 95%;
+                padding: 25px 20px;
+                max-height: 85vh;
+                overflow-y: auto;
+            }
+
+            .letter-content::before {
+                top: 8px; left: 8px; right: 8px; bottom: 8px;
+            }
+
+            .letter-title {
+                font-size: 26px;
+            }
+
+            .letter-date {
+                font-size: 12px;
+            }
+
+            .letter-body {
+                font-size: 14px;
+                line-height: 1.7;
+                text-align: left;
+            }
+
+            .letter-body p {
+                text-indent: 15px;
+                margin-bottom: 12px;
+            }
+
+            .letter-signature {
+                font-size: 20px;
+            }
+
+            .flower-corner {
+                font-size: 35px;
+            }
+
+            .flower-corner.top-left {
+                top: -10px;
+                left: -10px;
+            }
+
+            .flower-corner.bottom-right {
+                bottom: -10px;
+                right: -10px;
+            }
+
+            .see-flower-btn {
+                padding: 10px 25px;
+                font-size: 18px;
+            }
+
+            /* Girasol responsivo */
+            .sunflower-scene {
+                padding: 15px;
+            }
+
+            .sunflower-scene h1 {
+                font-size: 28px;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .canvas-container {
+                padding: 15px;
+                border-radius: 12px;
+                max-width: 95vw;
+            }
+
+            .canvas-container::before {
+                top: 10px; left: 10px; right: 10px; bottom: 10px;
+            }
+
+            .canvas-container::after {
+                font-size: 28px;
+                top: -12px;
+                right: -12px;
+            }
+
+            #canvas {
+                max-width: 90vw;
+                max-height: 50vh;
+            }
+
+            .loading {
+                font-size: 16px;
+                margin-top: 15px;
+            }
+
+            .back-btn {
+                top: 10px;
+                left: 10px;
+                padding: 10px 18px;
+                font-size: 14px;
+            }
+
+            .petal {
+                font-size: 16px;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 380px) {
+            .envelope-scene {
+                max-width: 300px;
+            }
+
+            .envelope {
+                height: 190px;
+            }
+
+            .wax-seal {
+                width: 45px;
+                height: 45px;
+            }
+
+            .wax-seal::before {
+                font-size: 18px;
+            }
+
+            .flower-decoration {
+                font-size: 28px;
+            }
+
+            .envelope.open .letter-mini {
+                transform: translateY(-180px);
+            }
+
+            .letter-content {
+                padding: 20px 15px;
+            }
+
+            .letter-title {
+                font-size: 22px;
+            }
+
+            .letter-body {
+                font-size: 13px;
+            }
+
+            .letter-signature {
+                font-size: 18px;
+            }
+
+            .sunflower-scene h1 {
+                font-size: 24px;
+            }
+
+            .canvas-container {
+                padding: 12px;
+            }
+
+            #canvas {
+                max-height: 45vh;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .envelope-scene {
+                max-width: 280px;
+                height: auto;
+            }
+
+            .envelope {
+                height: 170px;
+            }
+
+            .letter-content {
+                max-height: 90vh;
+                padding: 20px;
+            }
+
+            .letter-body {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+
+            .sunflower-scene h1 {
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+
+            .canvas-container {
+                padding: 10px;
+            }
+
+            #canvas {
+                max-height: 60vh;
+            }
+
+            .back-btn {
+                top: 8px;
+                left: 8px;
+                padding: 8px 15px;
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
